@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Harshith G S | Finance & Accounting Professional</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #456882;
+      --panel: #5A7A9F;
+      --text: #F5F6FA;
+      --accent: #FFD700;
+      --accent-dark: #FFA500;
+      --border: rgba(255,255,255,0.1);
+      --card-bg: rgba(255,255,255,0.05);
+    }
+    body.light {
+      --bg: #E3E3E3;
+      --panel: #F0F0F0;
+      --text: #2C2C2C;
+      --accent: #D4AF37;
+      --accent-dark: #B8860B;
+      --border: rgba(0,0,0,0.1);
+      --card-bg: rgba(0,0,0,0.03);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .floating-icons {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .floating-icons span {
+      position: absolute;
+      color: rgba(255,255,255,0.12);
+      font-weight: 700;
+      font-size: 2.4rem;
+      animation: floatUp 14s linear infinite;
+      opacity: 0;
+    }
+    body.light .floating-icons span {
+      color: rgba(0,0,0,0.10);
+    }
+    .floating-icons span:nth-child(1) { left: 8%;  animation-duration: 18s; animation-delay: 0s; }
+    .floating-icons span:nth-child(2) { left: 20%; animation-duration: 16s; animation-delay: 3s; }
+    .floating-icons span:nth-child(3) { left: 35%; animation-duration: 20s; animation-delay: 6s; }
+    .floating-icons span:nth-child(4) { left: 50%; animation-duration: 17s; animation-delay: 2s; }
+    .floating-icons span:nth-child(5) { left: 65%; animation-duration: 19s; animation-delay: 5s; }
+    .floating-icons span:nth-child(6) { left: 78%; animation-duration: 21s; animation-delay: 1s; }
+    .floating-icons span:nth-child(7) { left: 88%; animation-duration: 18s; animation-delay: 4s; }
+    .floating-icons span:nth-child(8) { left: 27%; animation-duration: 22s; animation-delay: 7s; }
+    .floating-icons span:nth-child(9) { left: 57%; animation-duration: 24s; animation-delay: 9s; }
+    .floating-icons span:nth-child(10){ left: 72%; animation-duration: 20s; animation-delay: 11s; }
+    .floating-icons span:nth-child(11){ left: 42%; animation-duration: 23s; animation-delay: 13s; }
+
+    @keyframes floatUp {
+      0% { transform: translateY(110vh) translateX(0); opacity: 0; }
+      10% { opacity: 1; }
+      50% { opacity: 0.9; transform: translateY(40vh) translateX(-10px); }
+      90% { opacity: 0; }
+      100% { transform: translateY(-20vh) translateX(10px); opacity: 0; }
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 2;
+    }
+
+    .brand {
+      font-size: 1.6rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .nav { flex: 1; }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--text);
+      text-decoration: none;
+      padding: 14px 16px;
+      border-radius: 12px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .nav a:hover, .nav a.active {
+      background: var(--card-bg);
+      transform: translateX(8px);
+      color: var(--accent);
+    }
+
+    .nav a i { width: 20px; opacity: 0.8; }
+    .nav a.active i { opacity: 1; }
+
+    .theme-toggle {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 1000;
+      padding: 12px 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    .theme-toggle:hover {
+      background: var(--accent);
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    main {
+      flex: 1;
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    section {
+      display: none;
+      animation: fadeInUp 0.6s ease forwards;
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    section.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .home {
+      text-align: center;
+      padding: 60px 0;
+    }
+
+    .profile-pic {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid var(--accent);
+      margin-bottom: 32px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+    }
+
+    .home h1 {
+      font-size: 3.2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+
+    .home-subtitle {
+      font-size: 1.3rem;
+      color: #A8B2D1;
+      margin-bottom: 40px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 14px 32px;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: #000;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    h2 {
+      font-size: 2.2rem;
+      margin-bottom: 24px;
+      color: var(--accent);
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    h2::before {
+      content: '';
+      width: 4px;
+      height: 30px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .content-card {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      margin-bottom: 32px;
+    }
+
+    .job-entry {
+      margin-bottom: 40px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .job-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .company {
+      font-size: 1.1rem;
+      color: var(--accent);
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .dates {
+      color: #A8B2D1;
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    ul {
+      padding-left: 28px;
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 12px;
+      line-height: 1.7;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .skill-tag {
+      background: var(--card-bg);
+      padding: 12px 20px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+      body { flex-direction: column; }
+      main { padding: 24px 20px; }
+      .profile-pic { width: 160px; height: 160px; }
+      .home h1 { font-size: 2.4rem; }
+      .cta-buttons { flex-direction: column; align-items: center; }
+      .theme-toggle { top: 16px; right: 16px; padding: 10px 14px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="floating-icons">
+    <span>₹</span>
+    <span>%</span>
+    <span>+</span>
+    <span>BRS</span>
+    <span>Tally</span>
+    <span>Zoho</span>
+    <span>👨‍🎓</span>
+    <span>💻</span>
+    <span>💸</span>
+    <span>-</span>
+    <span>=</span>
+    <span>GST</span>
+    <span>TDS</span>
+    <span>AR</span>
+    <span>AP</span>
+    <span>📈</span>
+    <span>📊</span>
+  </div>
+
+  <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+    <i class="fas fa-sun"></i>
+  </button>
+
+  <nav class="sidebar">
+    <div class="brand">Harshith G S</div>
+    <nav class="nav">
+      <a href="#home" class="nav-link active"><i class="fas fa-home"></i> Home</a>
+      <a href="#summary" class="nav-link"><i class="fas fa-user-tie"></i> Professional Summary</a>
+      <a href="#experience" class="nav-link"><i class="fas fa-briefcase"></i> Work Experience</a>
+      <a href="#achievements" class="nav-link"><i class="fas fa-trophy"></i> Key Achievements</a>
+      <a href="#projects" class="nav-link"><i class="fas fa-project-diagram"></i> Key Projects</a>
+      <a href="#functional" class="nav-link"><i class="fas fa-sitemap"></i> Functional Experience</a>
+      <a href="#dashboards" class="nav-link"><i class="fas fa-chart-line"></i> Finance Dashboards</a>
+      <a href="#skills" class="nav-link"><i class="fas fa-tools"></i> Skills & Tools</a>
+      <a href="#education" class="nav-link"><i class="fas fa-graduation-cap"></i> Education</a>
+      <a href="#contact" class="nav-link"><i class="fas fa-address-book"></i> Contact</a>
+    </nav>
+  </nav>
+
+  <main>
+    <section id="home" class="home show">
+      <img src="profile.jpg" alt="Harshith G S" class="profile-pic">
+      <h1>Harshith G S</h1>
+      <p class="home-subtitle">Finance & Accounting Professional | CA Inter Aspirant</p>
+      <div class="cta-buttons">
+        <a href="https://linkedin.com/in/harshiee" class="btn" target="_blank">
+          <i class="fab fa-linkedin"></i> LinkedIn Profile
+        </a>
+        <a href="Harshith_G_S_Resume.pdf" class="btn" download>
+          <i class="fas fa-download"></i> Download Resume
+        </a>
+      </div>
+    </section>
+
+    <section id="summary">
+      <div class="content-card">
+        <h2><i class="fas fa-user-tie"></i> Professional Summary</h2>
+        <p>Results-oriented Finance and Accounting professional with one year of hands-on experience as an Accounts Executive, managing core accounting, taxation, and financial reporting activities. Proven ability to handle end-to-end bookkeeping, GST registration and compliance, bank and balance sheet reconciliations, month-end closing, and MIS reporting, ensuring accuracy, compliance, and timely delivery.</p>
+        <p style="margin-top:16px;">A CA Intermediate Aspirant, actively enhancing expertise in financial reporting, statutory and GST compliance, direct tax basics, and audit support, with a strong understanding of internal controls and process improvement. Adept at leveraging MS Excel, ERP systems (Zoho Books, Frappe ERP), and Power BI dashboards to deliver insightful, management-ready reports.</p>
+        <p style="margin-top:16px;">A B.Com graduate from Community Institute of Management Studies, Bengaluru, recognized for strong analytical thinking, ownership mindset, and effective stakeholder communication. Fluent in Kannada, English, Hindi, and spoken Tamil, and seeking to contribute to Big 4 or MNC finance teams through reliable execution, compliance excellence, and continuous improvement.</p>
+      </div>
+    </section>
+
+    <section id="experience">
+      <div class="content-card">
+        <h2><i class="fas fa-briefcase"></i> Work Experience</h2>
+
+        <div class="job-entry">
+          <h3 class="job-title">Accounts Executive</h3>
+          <div class="company">Karthika Consulting and Solutions Pvt Ltd</div>
+          <div class="dates">Sept 2024 – Dec 2025</div>
+          <ul>
+            <li>Managed daily bookkeeping and supported Accounts Payable and Accounts Receivable operations.</li>
+            <li>Prepared and filed GST returns (GSTR-1, GSTR-3B) and performed GSTR-2A/2B reconciliations.</li>
+            <li>Conducted monthly bank reconciliations to ensure accuracy of ledgers.</li>
+            <li>Supported month-end close activities by completing reconciliations and updating financial schedules.</li>
+            <li>Maintained accurate ledgers in Frappe ERP (ERPNXT) ensuring compliance with accounting standards.</li>
+            <li>Handled fixed asset accounting, depreciation posting, and asset register maintenance.</li>
+            <li>Prepared daily, weekly, and monthly MIS and revenue reports.</li>
+            <li>Maintained petty cash expenses and supported audit documentation.</li>
+          </ul>
+        </div>
+
+        <div class="job-entry">
+          <h3 class="job-title">Finance Intern</h3>
+          <div class="company">Cynaris Solutions Pvt Ltd</div>
+          <div class="dates">Apr 2024 – May 2024</div>
+          <ul>
+            <li>Processed and tracked invoices, TDS workings, and assisted in budget preparation.</li>
+            <li>Supported the finance team in accurate GST compliance and filings.</li>
+            <li>Assisted with reconciliations and updating financial records using Excel and Power BI.</li>
+          </ul>
+        </div>
+
+        <div class="job-entry">
+          <h3 class="job-title">Accounts & Store Operations</h3>
+          <div class="company">GS Provision Stores</div>
+          <div class="dates">July 2020 – Sept 2023</div>
+          <ul>
+            <li>Prepared and generated customer bills accurately on a daily basis.</li>
+            <li>Recorded and maintained daily sales entries in ledger books.</li>
+            <li>Managed and updated stock statements ensuring accurate inventory tracking.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="achievements">
+      <div class="content-card">
+        <h2><i class="fas fa-trophy"></i> Key Achievements</h2>
+        <div class="achievements-grid">
+          <div><strong>Processed and reconciled 100+ customer and vendor invoices per month</strong> with high accuracy.</div>
+          <div><strong>Improved AR collections efficiency by ~20%</strong> through timely follow-ups and aging analysis.</div>
+          <div><strong>Completed monthly bank reconciliations with 100% accuracy</strong>, ensuring error-free ledgers.</div>
+          <div><strong>Supported GST filings (GSTR-1, GSTR-3B, 2A/2B)</strong> with zero late-fee instances during tenure.</div>
+          <div><strong>Reduced invoice discrepancies by 25%</strong> by strengthening PO–GRN–Invoice verification.</div>
+          <div><strong>Maintained inventory records for 50+ SKUs</strong>, supporting accurate stock reporting.</div>
+          <div><strong>Contributed to on-time month-end closing</strong> by preparing schedules ahead of deadlines.</div>
+          <div><strong>Automated MIS and reports using Excel & Power BI</strong>, reducing manual effort by 30%.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="projects">
+      <div class="content-card">
+        <h2><i class="fas fa-project-diagram"></i> Key Accounting Project</h2>
+        <h3>End-to-End Accounting Operations Project (ERP-Based)</h3>
+        <ul>
+          <li>Prepared customer invoices, tracked dispatch, and maintained AR aging reports.</li>
+          <li>Supported customer ledger reconciliation and followed up on outstanding receivables.</li>
+          <li>Processed vendor invoices by verifying PO, GRN, and supporting documents.</li>
+          <li>Performed vendor statement reconciliation and resolved discrepancies.</li>
+          <li>Maintained inventory records and performed stock & job-worker reconciliations.</li>
+          <li>Posted routine journal entries and supported month-end closing activities.</li>
+          <li>Assisted in GST and TDS compliance and compiled audit documentation.</li>
+          <li>Coordinated with Sales, Sourcing, and Operations teams for accounting clarifications.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="functional">
+      <div class="content-card">
+        <h2><i class="fas fa-sitemap"></i> Functional Experience Mapping</h2>
+        <div class="dashboard-grid">
+          <div>
+            <h3>Accounts Receivable (AR)</h3>
+            <ul>
+              <li>Customer invoicing & dispatch tracking</li>
+              <li>Outstanding follow-ups & aging analysis</li>
+              <li>Customer account reconciliation</li>
+              <li>GST compliance & audit schedules</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Accounts Payable (AP)</h3>
+            <ul>
+              <li>Vendor invoice processing with PO & GRN verification</li>
+              <li>Vendor reconciliation & clarification follow-ups</li>
+              <li>Procurement coordination</li>
+              <li>AP audit documentation</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Inventory & General Ledger</h3>
+            <ul>
+              <li>Inventory record maintenance in ERP</li>
+              <li>Stock & cycle count reconciliation</li>
+              <li>Journal entry posting</li>
+              <li>GL reconciliation & month-end schedules</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="dashboards">
+      <div class="content-card">
+        <h2><i class="fas fa-chart-line"></i> Mini Finance Dashboards</h2>
+        <p><strong>ERP & Excel-Based Finance Dashboards</strong></p>
+        <div class="dashboard-grid">
+          <div>
+            <h3>Accounts Receivable Dashboard</h3>
+            <ul>
+              <li>AR Aging (0–30 / 31–60 / 61–90 days)</li>
+              <li>Outstanding balance tracking</li>
+              <li>Customer-wise dues</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Accounts Payable Dashboard</h3>
+            <ul>
+              <li>Vendor-wise payables</li>
+              <li>Due date analysis</li>
+              <li>PO–GRN–Invoice status tracking</li>
+            </ul>
+          </div>
+          <div>
+            <h3>GST Compliance Dashboard</h3>
+            <ul>
+              <li>GSTR-1 vs GSTR-3B summary</li>
+              <li>2A/2B reconciliation status</li>
+              <li>ITC eligibility tracking</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Inventory Dashboard</h3>
+            <ul>
+              <li>Opening vs closing stock</li>
+              <li>Inward/outward movement</li>
+              <li>Variance and slow-moving items</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Month-End Close Tracker</h3>
+            <ul>
+              <li>Bank reconciliation status</li>
+              <li>Journal entry checklist</li>
+              <li>Schedule completion tracker</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills">
+      <div class="content-card">
+        <h2><i class="fas fa-tools"></i> Skills & Tools</h2>
+        <div class="skills-grid">
+          <div class="skill-tag">Accounts Receivable</div>
+          <div class="skill-tag">Accounts Payable</div>
+          <div class="skill-tag">Inventory Accounting</div>
+          <div class="skill-tag">General Ledger</div>
+          <div class="skill-tag">GST & TDS</div>
+          <div class="skill-tag">ERP Systems</div>
+          <div class="skill-tag">Excel (Advanced)</div>
+          <div class="skill-tag">Zoho Books</div>
+          <div class="skill-tag">Tally</div>
+          <div class="skill-tag">Power BI (Basic)</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <div class="content-card">
+        <h2><i class="fas fa-graduation-cap"></i> Education</h2>
+        <div class="job-entry">
+          <h3 class="job-title">Bachelor of Commerce (B.Com) – Finance & HR</h3>
+          <div class="company">Community Institute of Commerce and Management Studies, Bangalore City University</div>
+          <div class="dates">Sept 2021 – July 2024 | CGPA: 8.6</div>
+        </div>
+        <div class="job-entry">
+          <h3 class="job-title">CA Intermediate Aspirant</h3>
+        </div>
+        <div class="job-entry">
+          <h3 class="job-title">PUC – Commerce (MSBA) – 81%</h3>
+          <div class="company">St. Joseph's Pre-University College, Karnataka Board</div>
+          <div class="dates">May 2019 – March 2021</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="content-card">
+        <h2><i class="fas fa-address-book"></i> Contact Details</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; font-size: 1.1rem;">
+          <div>
+            <div style="font-weight: 600; color: var(--accent); margin-bottom: 8px;">📧 Email</div>
+            <div>harshiee2122@gmail.com</div>
+          </div>
+          <div>
+            <div style="font-weight: 600; color: var(--accent); margin-bottom: 8px;">📱 Phone</div>
+            <div>+91-7411709054 |+91-9916548886</div>
+          </div>
+          <div>
+            <div style="font-weight: 600; color: var(--accent); margin-bottom: 8px;">📍 Location</div>
+            <div>Bangalore, Karnataka</div>
+          </div>
+          <div>
+            <div style="font-weight: 600; color: var(--accent); margin-bottom: 8px;">💼 LinkedIn</div>
+            <a href="https://linkedin.com/in/harshiee" style="color: var(--accent);">linkedin.com/in/harshiee</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const navLinks = document.querySelectorAll('.nav-link');
+    const sections = document.querySelectorAll('section');
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+
+        navLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+
+        sections.forEach(s => s.classList.remove('show'));
+        document.getElementById(targetId).classList.add('show');
+
+        document.querySelector('main').scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    });
+
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      themeToggle.innerHTML = isLight ? '<i class="fas fa-moon"></i>' : '<i class="fas fa-sun"></i>';
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+      themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
