@@ -176,13 +176,16 @@
     }
 
     .profile-pic {
-      width: 220px;
-      height: 220px;
+      width: 240px;
+      height: 290px;
+aspect-ratio: 1 / 1; /* Forces square dimensions */
       border-radius: 50%;
-      object-fit: cover;
+border-radius: 16px; /* Soft rounded corners; change to 0 for sharp square */
+      object-fit: cover; /* Important: prevents video stretching */
       border: 5px solid var(--accent);
       margin-bottom: 32px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      background: #000; /* Fallback color */
     }
 
     .home h1 {
@@ -377,9 +380,12 @@
     </nav>
   </nav>
 
-  <main>
+<main>
     <section id="home" class="home show">
-      <img src="profile.jpg" alt="Harshith G S" class="profile-pic">
+      <video autoplay muted loop playsinline class="profile-pic">
+        <source src="profile.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
       <h1>Harshith G S</h1>
       <p class="home-subtitle">Finance & Accounting Professional | CA Aspirant</p>
       <div class="cta-buttons">
@@ -675,9 +681,3 @@
 </body>
 
 </html>
-
-
-
-
-
-
