@@ -415,6 +415,66 @@
       padding-bottom: 12px;
     }
 
+    /* ===== At a Glance Section ===== */
+    .glance-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+      gap: 16px;
+    }
+
+    .dashboard-card {
+      text-align: center;
+      padding: 28px 20px;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 200ms cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dashboard-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--color-accent), transparent);
+      border-radius: 24px 24px 0 0;
+    }
+
+    .dashboard-card:hover {
+      border-color: var(--color-accent);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .dash-icon {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      color: var(--color-primary);
+    }
+
+    .dash-value {
+      font-family: var(--font-heading);
+      font-size: clamp(1.8rem, 1.5rem + 1.5vw, 2.6rem);
+      font-weight: 800;
+      color: var(--color-accent);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .dash-label {
+      font-family: var(--font-tech);
+      font-size: 0.72rem;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
     .contact-grid {
       display: grid; 
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); 
@@ -505,9 +565,10 @@
     <a href="#summary" class="nav-link"><i class="fas fa-terminal"></i> <span>Summary</span></a>
     <a href="#experience" class="nav-link"><i class="fas fa-briefcase"></i> <span>Experience</span></a>
     <a href="#projects" class="nav-link"><i class="fas fa-code-branch"></i> <span>Projects</span></a>
-    <a href="#dashboards" class="nav-link"><i class="fas fa-chart-line"></i> <span>Dashboards</span></a>
+    <a href="#functional" class="nav-link"><i class="fas fa-network-wired"></i> <span>Expertise</span></a>
+    <a href="#glance" class="nav-link"><i class="fa-solid fa-gauge-high"></i> <span>Metrics</span></a>
     <a href="#skills" class="nav-link"><i class="fas fa-microchip"></i> <span>Skills</span></a>
-<a href="#education" class="nav-link"><i class="fas fa-microchip"></i> <span>Qualifications</span></a>
+    <a href="#education" class="nav-link"><i class="fas fa-graduation-cap"></i> <span>Education</span></a>
     <a href="#contact" class="nav-link"><i class="fas fa-satellite-dish"></i> <span>Contact</span></a>
   </nav>
 
@@ -549,7 +610,7 @@
       <p style="margin-top: 20px;">I am currently pursuing CA, continuously building my knowledge in taxation, financial reporting, and audit. I enjoy working in fast-paced environments where I can take ownership, solve practical problems, and contribute to efficient financial processes.</p>
       <p>I’m particularly interested in opportunities in Tax, Audit, or Finance roles where I can further strengthen my expertise and add value.</p>
       <div style="margin-top:20px; padding: 16px; background: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: 8px; font-family: var(--font-tech); font-size: 0.9rem;">
-        <span style="color: var(--color-primary);">Tools & Systems:</span> MS Excel | Zoho Books | ERPNext (Frappe) | Power BI | Razorpay | 
+        <span style="color: var(--color-primary);">Tools & Systems:</span> MS Excel | Zoho Books | ERPNext (Frappe) | Power BI | Razorpay
       </div>
     </section>
 
@@ -685,6 +746,48 @@
       </div>
     </section>
 
+    <section id="glance" class="content-card reveal">
+      <h2><i class="fa-solid fa-gauge-high"></i> At a Glance</h2>
+      <div class="glance-grid">
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-file-invoice"></i></div>
+          <div class="dash-value">200+</div>
+          <div class="dash-label">Invoices/Month</div>
+        </div>
+
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-users"></i></div>
+          <div class="dash-value">10+</div>
+          <div class="dash-label">GST Clients</div>
+        </div>
+
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-percent"></i></div>
+          <div class="dash-value">100%</div>
+          <div class="dash-label">On-Time Filing</div>
+        </div>
+
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          <div class="dash-value">₹1.8L</div>
+          <div class="dash-label">ITC Recovered</div>
+        </div>
+
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-code"></i></div>
+          <div class="dash-value">Services</div>
+
+          <div class="dash-label">Live Website</div>
+        </div>
+
+        <div class="dashboard-card reveal">
+          <div class="dash-icon"><i class="fa-solid fa-clock"></i></div>
+          <div class="dash-value">08h/day</div>
+          <div class="dash-label">Study Discipline</div>
+        </div>
+      </div>
+    </section>
+
     <section id="dashboards" class="content-card reveal">
       <h2><i class="fas fa-chart-line"></i> Mini Finance Dashboards</h2>
       <p style="margin-bottom: 24px; font-family: var(--font-tech); color: var(--color-primary-soft);">// ERP & Excel-Based Finance Dashboards</p>
@@ -729,6 +832,15 @@
             <li>Schedule completion tracker</li>
           </ul>
         </div>
+<div class="reveal">
+          <h3>Year-End Report</h3>
+          <ul>
+            <li>Clients Ledger Creation</li>
+            <li>TDS-Reconciliation with 26AS</li>
+            <li>Maintaining Clean Books</li>
+          </ul>
+        </div>
+      
       </div>
     </section>
 
@@ -737,7 +849,7 @@
       <div class="skills-grid">
         <div class="skill-tag reveal">Accounts Receivable</div>
         <div class="skill-tag reveal">Accounts Payable</div>
-        <div class="skill-tag reveal">Inventory Accounting</div>
+        <div class="skill-tag reveal">Asset Management</div>
         <div class="skill-tag reveal">General Ledger</div>
         <div class="skill-tag reveal">GST & TDS</div>
         <div class="skill-tag reveal">ERP Systems</div>
@@ -745,6 +857,16 @@
         <div class="skill-tag reveal">Zoho Books</div>
         <div class="skill-tag reveal">Tally</div>
         <div class="skill-tag reveal">Power BI (Basic)</div>
+        <div class="skill-tag reveal">MCA</div>
+        <div class="skill-tag reveal">WIN MAN</div>
+        <div class="skill-tag reveal">Razorpay</div>
+        <div class="skill-tag reveal">RazorpayX</div>
+        <div class="skill-tag reveal">RazorpayX Payroll</div>
+        <div class="skill-tag reveal">Traces</div>
+        <div class="skill-tag reveal">DSC HYP-2003</div>
+        <div class="skill-tag reveal">PF</div>
+        <div class="skill-tag reveal">ESI</div>
+        <div class="skill-tag reveal">PT</div>
       </div>
     </section>
 
