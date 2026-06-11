@@ -7,1116 +7,410 @@
   <link rel="shortcut icon" type="image/png" href="SVG.png" />
   <link rel="apple-touch-icon" href="MYSVG.png" />
   <title>Harshith G S | Finance & Accounting Professional</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
     :root {
       --gold: #e0a94c;
       --gold-light: #f0ba5e;
       --gold-dark: #c8922a;
       --neon: #00e5ff;
-      --neon-dim: rgba(0,229,255,0.12);
-      --neon-glow: rgba(0,229,255,0.06);
       --white: #ffffff;
-      --off-white: rgba(255,255,255,0.85);
-      --muted: rgba(255,255,255,0.60);
-      --dim: rgba(255,255,255,0.36);
-      --dark: #0a0c10;
-      --dark-2: #0d1016;
-      --dark-3: #121722;
-      --line: rgba(255,255,255,0.10);
-      --line-strong: rgba(224,169,76,0.22);
-      --shadow: 0 20px 45px rgba(0,0,0,0.35);
-      --shadow-lg: 0 28px 60px rgba(0,0,0,0.45);
-
+      --off-white: rgba(255,255,255,0.88);
+      --muted: rgba(255,255,255,0.58);
+      --dim: rgba(255,255,255,0.32);
+      --dark: #090c11;
       --ff-head: 'Poppins', sans-serif;
       --ff-body: 'Inter', sans-serif;
       --ff-mono: 'JetBrains Mono', monospace;
     }
-
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; }
     body {
       font-family: var(--ff-body);
-      background-color: #090c11;
-      background-image:
-        radial-gradient(circle at top left, rgba(224,169,76,0.08), transparent 22%),
-        radial-gradient(circle at top right, rgba(255,255,255,0.04), transparent 18%);
+      background-color: #07090e;
       color: var(--white);
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
-      position: relative;
     }
 
+    /* Fixed canvas — sits behind everything */
+    #bgCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Subtle grid overlay */
     body::before {
-      content: "";
-      position: absolute;
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.016) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.016) 1px, transparent 1px);
+      background-size:52px 52px;
+      mask-image:linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.08));
+    }
+
+    /* Vignette edges */
+    body::after {
+      content:""; position:fixed; inset:0; pointer-events:none; z-index:1;
+      background: radial-gradient(ellipse at center, transparent 55%, rgba(5,7,12,0.55) 100%);
+    }
+
+    /* ── FLOATING FINANCE ICONS (sparse) ── */
+    #symbolLayer {
+      position: fixed;
       inset: 0;
       pointer-events: none;
-      z-index: -1;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-      background-size: 44px 44px;
-      mask-image: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.12));
-    }
-
-    /* ─── FLOATING BACKGROUND WORDS ─── */
-    .bg-float-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 0;
+      z-index: 2;
       overflow: hidden;
     }
-
-    .bg-word {
+    .sym {
       position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      animation: symDrift linear infinite;
+      will-change: transform, opacity;
+    }
+    .sym.icon { font-size: 1.1rem; }
+    .sym.icon.lg { font-size: 1.9rem; }
+    .sym.word {
       font-family: var(--ff-mono);
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.14em;
       white-space: nowrap;
-      opacity: 0;
-      animation: floatWord linear infinite;
     }
-
-    .bg-word.gold-word { color: rgba(224,169,76,0.13); }
-    .bg-word.neon-word { color: rgba(0,229,255,0.09); }
-
-    .bg-icon {
-      position: absolute;
-      font-size: 1.1rem;
-      opacity: 0;
-      animation: floatWord linear infinite;
-    }
-    .bg-icon.gold-icon { color: rgba(224,169,76,0.10); }
-    .bg-icon.neon-icon { color: rgba(0,229,255,0.07); }
-
-    @keyframes floatWord {
-      0%   { opacity: 0; transform: translateY(0) rotate(var(--rot, 0deg)); }
+    .sym.c-gold  { color: rgba(224,169,76,0.18); }
+    .sym.c-neon  { color: rgba(0,229,255,0.13); }
+    .sym.c-white { color: rgba(255,255,255,0.08); }
+    @keyframes symDrift {
+      0%   { opacity: 0; transform: translateY(0) rotate(var(--r,0deg)); }
       8%   { opacity: 1; }
       90%  { opacity: 1; }
-      100% { opacity: 0; transform: translateY(calc(-1 * var(--travel, 300px))) rotate(var(--rot, 0deg)); }
+      100% { opacity: 0; transform: translateY(var(--dy,-260px)) rotate(var(--r2,0deg)); }
     }
 
-    /* ─── HERO ─── */
-    #home {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      z-index: 1;
-    }
-
-    .hero-bg {
-      position: absolute;
-      inset: 0;
-      background: url('mine.png') center center / cover no-repeat;
-      z-index: 0;
-    }
-
+    /* ── HERO ── */
+    #home { position:relative; width:100%; min-height:100vh; display:flex; flex-direction:column; overflow:hidden; border-bottom:1px solid rgba(255,255,255,0.07); z-index:2; }
+    .hero-bg { position:absolute; inset:0; background:url('mine.png') center center / cover no-repeat; z-index:0; }
     .hero-bg::after {
-      content: '';
-      position: absolute;
-      inset: 0;
+      content:''; position:absolute; inset:0;
       background:
-        linear-gradient(
-          to right,
-          rgba(5,7,12,0.92) 0%,
-          rgba(5,7,12,0.78) 38%,
-          rgba(5,7,12,0.34) 60%,
-          rgba(5,7,12,0.08) 100%
-        ),
-        linear-gradient(
-          to bottom,
-          rgba(5,7,12,0.55) 0%,
-          transparent 18%,
-          transparent 75%,
-          rgba(5,7,12,0.70) 100%
-        );
-    }
-
-    .hero-divider {
-      position: absolute;
-      top: 78px;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: rgba(255,255,255,0.08);
-      z-index: 10;
-    }
-
-    .hero-nav {
-      position: relative;
-      z-index: 20;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 22px 56px;
-      height: 78px;
-    }
-
-    .nav-logo {
-      font-family: var(--ff-head);
-      font-size: 1.25rem;
-      font-weight: 900;
-      color: var(--white);
-      text-decoration: none;
-      letter-spacing: 0.02em;
-    }
-
-    .nav-logo span { color: var(--gold); }
-
-    .nav-links {
-      display: flex;
-      gap: 40px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: rgba(255,255,255,0.75);
-      text-decoration: none;
-      font-size: 0.82rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--white); }
-
-    .nav-cv {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1.5px solid rgba(255,255,255,0.3);
-      color: var(--white);
-      text-decoration: none;
-      padding: 10px 22px;
-      border-radius: 8px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s;
-      white-space: nowrap;
-    }
-
-    .nav-cv:hover {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #080c12;
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 10;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 20px 56px 0 56px;
-      max-width: 640px;
-    }
-
-    .hero-greeting {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 1.15rem;
-      font-weight: 500;
-      color: var(--off-white);
-      margin-bottom: 10px;
-      animation: fadeUp .6s ease both .1s;
-    }
-
-    .hero-greeting .hi-accent { color: var(--gold); font-weight: 700; }
-
-    .hero-name {
-      font-family: var(--ff-head);
-      font-size: clamp(3.4rem, 6.5vw, 6.2rem);
-      font-weight: 900;
-      line-height: 0.95;
-      color: var(--white);
-      letter-spacing: -0.03em;
-      margin-bottom: 20px;
-      animation: fadeUp .6s ease both .22s;
-    }
-
-    .hero-subtitle {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--off-white);
-      margin-bottom: 22px;
-      flex-wrap: wrap;
-      animation: fadeUp .6s ease both .34s;
-    }
-
-    .hero-subtitle .bull { color: var(--gold); font-size: 1.2rem; line-height: 1; }
-
-    .hero-desc {
-      font-size: 0.98rem;
-      line-height: 1.82;
-      color: var(--muted);
-      margin-bottom: 36px;
-      max-width: 460px;
-      animation: fadeUp .6s ease both .44s;
-    }
-
-    .hero-ctas {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      animation: fadeUp .6s ease both .54s;
-    }
-
-    .btn-gold {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: var(--gold);
-      color: #080c12;
-      text-decoration: none;
-      padding: 15px 32px;
-      border-radius: 8px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: all .3s;
-      border: none;
-    }
-
-    .btn-gold:hover {
-      background: var(--gold-light);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(224,169,76,0.45);
-    }
-
-    .btn-outline {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: transparent;
-      color: var(--white);
-      text-decoration: none;
-      padding: 15px 32px;
-      border-radius: 8px;
-      border: 1.5px solid rgba(255,255,255,0.35);
-      font-size: 0.82rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: all .3s;
-    }
-
-    .btn-outline:hover {
-      border-color: rgba(255,255,255,0.7);
-      background: rgba(255,255,255,0.06);
-      transform: translateY(-2px);
-    }
-
-    .hero-stats-row {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      gap: 52px;
-      padding: 40px 56px 52px;
-      animation: fadeUp .6s ease both .7s;
-    }
-
-    .h-stat { display: flex; flex-direction: column; gap: 2px; }
-    .h-stat-icon { color: var(--gold); font-size: 1.1rem; margin-bottom: 6px; }
-    .h-stat-num { font-family: var(--ff-head); font-size: 2.1rem; font-weight: 800; color: var(--white); line-height: 1; }
-    .h-stat-lbl { font-size: 0.75rem; color: var(--dim); text-transform: uppercase; letter-spacing: 0.1em; }
-
-    .available-badge {
-      position: absolute;
-      bottom: 52px;
-      right: 56px;
-      z-index: 20;
-      background: rgba(8,10,16,0.82);
-      border: 1px solid rgba(255,255,255,0.12);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      padding: 14px 18px;
-      border-radius: 14px;
-      min-width: 220px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-      animation: fadeUp .6s ease both .9s;
-    }
-
-    .badge-top {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--white);
-      margin-bottom: 5px;
-    }
-
-    .dot-green {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 0 3px rgba(34,197,94,0.22);
-      flex-shrink: 0;
-      animation: pulse-green 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse-green {
-      0%,100% { box-shadow: 0 0 0 3px rgba(34,197,94,0.22); }
-      50% { box-shadow: 0 0 0 7px rgba(34,197,94,0.07); }
-    }
-
-    .badge-sub {
-      font-size: 0.76rem;
-      color: rgba(255,255,255,0.42);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .zap { color: var(--gold); }
-
-    @keyframes fadeUp {
-      from { opacity:0; transform:translateY(22px); }
-      to { opacity:1; transform:translateY(0); }
-    }
-
-    /* ─── THEMED BODY ─── */
-    .themed-body {
-      position: relative;
-      padding-top: 26px;
-      z-index: 1;
-    }
-
-    main {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 50px 20px 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 56px;
-    }
-
-    /* ─── REVEAL ANIMATION (fixed) ─── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(32px);
-      transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
-      will-change: opacity, transform;
-    }
-
-    .reveal.visible {
-      opacity: 1 !important;
-      transform: translateY(0) !important;
-    }
-
-    /* ─── CONTENT CARD ─── */
-    .content-card {
-      position: relative;
-      overflow: visible;
-    }
-
-    /* Neon corner accent */
-    .content-card::before {
-      content: '';
-      position: absolute;
-      top: -1px;
-      left: 0;
-      width: 60px;
-      height: 2px;
-      background: linear-gradient(90deg, var(--neon), transparent);
-      opacity: 0.5;
-      border-radius: 2px;
-    }
-
-    /* ─── SECTION HEADINGS ─── */
-    h2 {
-      font-family: var(--ff-head);
-      font-size: 1.9rem;
-      margin-bottom: 28px;
-      color: var(--white);
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      position: relative;
-      padding-bottom: 14px;
-    }
-
-    h2::after {
-      content: "";
-      height: 1px;
-      flex: 1;
-      background: linear-gradient(90deg, rgba(224,169,76,0.45), rgba(0,229,255,0.08), transparent);
-      margin-left: 6px;
-    }
-
-    h2::before {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 40px;
-      height: 1px;
-      background: var(--neon);
-      opacity: 0.4;
-      box-shadow: 0 0 8px var(--neon);
-    }
-
-    h2 i { color: var(--gold); font-size: 1.25rem; }
-
-    /* ─── SECTION WRAP — glass card style ─── */
-    .section-wrap {
-      padding: 32px 36px 36px;
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 20px;
-      background: rgba(255,255,255,0.025);
-      backdrop-filter: blur(4px);
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 0 0 1px rgba(0,0,0,0.3) inset, 0 4px 32px rgba(0,0,0,0.2);
-      transition: border-color 0.3s;
-    }
-
-    .section-wrap:hover {
-      border-color: rgba(224,169,76,0.14);
-    }
-
-    /* Subtle inner glow top-right */
-    .section-wrap::before {
-      content: '';
-      position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,255,0.04), transparent 70%);
-      pointer-events: none;
-    }
-
-    /* Bottom gold accent line */
-    .section-wrap::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(224,169,76,0.2), transparent);
-    }
-
-    p { margin-bottom: 16px; line-height: 1.75; color: var(--muted); }
-
-    .highlight-text {
-      color: var(--gold-light);
-      font-weight: 700;
-      margin-top: 18px;
-      margin-bottom: 14px;
-      letter-spacing: 0.02em;
-    }
-
-    /* ─── JOB ENTRIES ─── */
-    .job-entry {
-      margin-bottom: 28px;
-      padding: 22px 24px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      position: relative;
-      transition: border-color 0.25s, background 0.25s;
-    }
-
-    .job-entry::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      border-radius: 2px;
-      background: linear-gradient(to bottom, var(--gold), transparent);
-    }
-
-    .job-entry:hover {
-      border-color: rgba(224,169,76,0.18);
-      background: rgba(224,169,76,0.025);
-    }
-
-    .job-entry:last-child { margin-bottom: 0; }
-
-    .job-title {
-      font-family: var(--ff-head);
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: var(--white);
-      margin-bottom: 6px;
-      letter-spacing: -0.02em;
-    }
-
-    .company {
-      font-size: 0.95rem;
-      color: var(--gold);
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-
-    .category-header {
-      font-size: 0.78rem;
-      color: var(--neon);
-      font-weight: 600;
-      margin-top: 20px;
-      margin-bottom: 12px;
-      font-family: var(--ff-mono);
-      text-transform: uppercase;
-      letter-spacing: 0.13em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      opacity: 0.8;
-    }
-
-    .category-header::before {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 1px;
-      background: var(--neon);
-      box-shadow: 0 0 6px var(--neon);
-    }
-
-    .dates {
-      color: rgba(255,255,255,0.65);
-      font-family: var(--ff-mono);
-      font-size: 0.77rem;
-      margin-bottom: 18px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: rgba(255,255,255,0.04);
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.07);
-    }
-
-    .dates::before {
-      content: '';
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 6px rgba(224,169,76,0.6);
-    }
-
-    ul { list-style: none; padding-left: 0; }
-
-    li {
-      margin-bottom: 12px;
-      line-height: 1.68;
-      color: var(--muted);
-      position: relative;
-      padding-left: 22px;
-    }
-
-    li::before {
-      content: '▹';
-      position: absolute;
-      left: 0;
-      color: var(--gold);
-      font-family: var(--ff-mono);
-      font-size: 1rem;
-      line-height: 1.1;
-    }
-
-    strong { color: var(--off-white); font-weight: 600; }
-
-    .info-strip {
-      margin-top: 22px;
-      padding: 14px 18px;
-      background: rgba(0,229,255,0.04);
-      border: 1px solid rgba(0,229,255,0.12);
-      border-radius: 10px;
-      font-family: var(--ff-mono);
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
-
-    .info-strip span { color: var(--neon); opacity: 0.9; }
-
-    /* ─── SKILLS GRID ─── */
-    .skills-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-      gap: 12px;
-    }
-
-    .skill-tag {
-      background: rgba(255,255,255,0.03);
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.08);
-      text-align: center;
-      font-family: var(--ff-mono);
-      font-size: .82rem;
-      color: var(--off-white);
-      transition: all .25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .skill-tag::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.25), transparent);
-      opacity: 0;
-      transition: opacity 0.25s;
-    }
-
-    .skill-tag:hover {
-      border-color: rgba(0,229,255,0.3);
-      background: rgba(0,229,255,0.06);
-      color: var(--neon);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0,229,255,0.08);
-    }
-
-    .skill-tag:hover::before { opacity: 1; }
-
-    /* ─── ACHIEVEMENTS GRID ─── */
-    .achievements-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-    }
-
-    .achieve-item {
-      padding: 18px 20px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      border-left: 2px solid rgba(224,169,76,0.4);
-      color: var(--muted);
-      font-size: 0.93rem;
-      line-height: 1.65;
-      transition: all 0.25s;
-      position: relative;
-    }
-
-    .achieve-item:hover {
-      border-left-color: var(--gold);
-      background: rgba(224,169,76,0.04);
-      transform: translateX(4px);
-    }
-
-    .achieve-item strong { color: var(--off-white); }
-
-    /* ─── DASHBOARD / FUNCTIONAL ─── */
-    .dashboard-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 18px;
-    }
-
-    .func-card {
-      padding: 22px 22px;
-      border-radius: 16px;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid rgba(255,255,255,0.07);
-      transition: all .25s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .func-card::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(0,229,255,0.15), transparent);
-    }
-
-    .func-card:hover {
-      border-color: rgba(0,229,255,0.18);
-      background: rgba(0,229,255,0.03);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-    }
-
-    .func-card h3 {
-      font-family: var(--ff-head);
-      color: var(--white);
-      margin-bottom: 14px;
-      font-size: 1rem;
-      letter-spacing: -0.01em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .func-card h3 i {
-      color: var(--neon);
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
-    /* ─── GLANCE GRID ─── */
-    .glance-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(180px,100%),1fr));
-      gap: 16px;
-    }
-
-    .dashboard-card {
-      text-align: center;
-      padding: 26px 18px 22px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 18px;
-      position: relative;
-      overflow: hidden;
-      transition: border-color .25s, transform .25s, box-shadow .25s;
-    }
-
-    .dashboard-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--gold), var(--neon), transparent);
-    }
-
-    .dashboard-card::after {
-      content: '';
-      position: absolute;
-      bottom: -30px; right: -30px;
-      width: 90px; height: 90px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,255,0.05), transparent 70%);
-    }
-
-    .dashboard-card:hover {
-      border-color: rgba(224,169,76,0.3);
-      transform: translateY(-5px);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.25), 0 0 20px rgba(0,229,255,0.04);
-    }
-
-    .dash-icon { font-size: 1.3rem; margin-bottom: 10px; color: var(--gold); }
-    .dash-value {
-      font-family: var(--ff-head);
-      font-size: clamp(1.8rem, 1.5rem + 1.5vw, 2.5rem);
-      font-weight: 800;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-    .dash-label {
-      font-family: var(--ff-mono);
-      font-size: .7rem;
-      color: var(--dim);
-      text-transform: uppercase;
-      letter-spacing: .11em;
-    }
-
-    /* ─── MINI DASHBOARDS ─── */
-    .mini-dash-item {
-      padding: 20px 22px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.025);
-      border: 1px solid rgba(255,255,255,0.07);
-      transition: all .25s;
-      position: relative;
-    }
-
-    .mini-dash-item:hover {
-      border-color: rgba(224,169,76,0.2);
-      background: rgba(224,169,76,0.025);
-      transform: translateY(-2px);
-    }
-
-    .mini-dash-item h3 {
-      font-family: var(--ff-head);
-      color: var(--white);
-      margin-bottom: 12px;
-      font-size: 0.95rem;
-    }
-
-    /* ─── CONTACT ─── */
-    .contact-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 18px;
-    }
-
-    .contact-item {
-      padding: 20px 22px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.07);
-      transition: all .25s;
-    }
-
-    .contact-item:hover {
-      border-color: rgba(0,229,255,0.2);
-      background: rgba(0,229,255,0.03);
-      transform: translateY(-2px);
-    }
-
-    .contact-label {
-      font-family: var(--ff-mono);
-      color: var(--neon);
-      margin-bottom: 10px;
-      font-size: .75rem;
-      text-transform: uppercase;
-      letter-spacing: 1.4px;
-      opacity: 0.85;
-    }
-
-    .contact-item a,
-    .contact-item div:not(.contact-label) {
-      color: var(--off-white);
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: color .2s;
-      line-height: 1.7;
-    }
-
-    .contact-item a:hover { color: var(--gold-light); }
-
-    /* ─── EDUCATION ─── */
-    .edu-item {
-      padding: 20px 24px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.06);
-      margin-bottom: 16px;
-      border-left: 2px solid rgba(0,229,255,0.3);
-      transition: all 0.25s;
-    }
-
-    .edu-item:last-child { margin-bottom: 0; }
-
-    .edu-item:hover {
-      border-left-color: var(--neon);
-      background: rgba(0,229,255,0.025);
-    }
-
-    /* ─── FOOTER ─── */
-    footer {
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 20px 40px;
-      color: var(--dim);
-      font-size: .84rem;
-      font-family: var(--ff-mono);
-    }
-
-    .footer-line {
-      border-top: 1px solid rgba(255,255,255,0.07);
-      padding-top: 22px;
-      text-align: center;
-    }
-
-    /* ─── NEON TAG (section accent) ─── */
-    .section-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-family: var(--ff-mono);
-      font-size: 0.68rem;
-      color: var(--neon);
-      background: rgba(0,229,255,0.07);
-      border: 1px solid rgba(0,229,255,0.15);
-      border-radius: 999px;
-      padding: 4px 12px;
-      margin-bottom: 14px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-    }
-
-    .section-tag::before {
-      content: '';
-      width: 5px; height: 5px;
-      border-radius: 50%;
-      background: var(--neon);
-      box-shadow: 0 0 6px var(--neon);
-    }
-
-    /* ─── RESPONSIVE ─── */
-    @media (max-width: 1024px) {
-      .hero-nav, .hero-content, .hero-stats-row { padding-left: 36px; padding-right: 36px; }
-      .available-badge { right: 36px; }
-      .nav-links { gap: 28px; }
-    }
-
-    @media (max-width: 768px) {
-      .hero-nav { padding: 18px 22px; height: auto; }
-      .nav-links { display: none; }
-      .hero-content { padding: 28px 22px 0; max-width: none; }
-      .hero-stats-row { padding: 32px 22px 110px; gap: 28px; flex-wrap: wrap; }
-      .available-badge { right: 22px; left: 22px; bottom: 28px; min-width: unset; }
-      .hero-bg::after {
-        background:
-          linear-gradient(to right, rgba(5,7,12,0.94) 0%, rgba(5,7,12,0.88) 60%, rgba(5,7,12,0.75) 100%),
-          linear-gradient(to bottom, rgba(5,7,12,0.5) 0%, transparent 20%, transparent 70%, rgba(5,7,12,0.7) 100%);
-      }
-      main { padding: 34px 14px 48px; gap: 36px; }
-      .section-wrap { padding: 22px 18px 26px; }
-      h2 { font-size: 1.4rem; }
-      .job-title { font-size: 1.15rem; }
-    }
-
-    /* ─── STICKY NAV ─── */
-    .sticky-nav {
+        linear-gradient(to right, rgba(5,7,12,0.92) 0%, rgba(5,7,12,0.78) 38%, rgba(5,7,12,0.34) 60%, rgba(5,7,12,0.08) 100%),
+        linear-gradient(to bottom, rgba(5,7,12,0.55) 0%, transparent 18%, transparent 75%, rgba(5,7,12,0.70) 100%);
+    }
+    .hero-divider { position:absolute; top:78px; left:0; right:0; height:1px; background:rgba(255,255,255,0.08); z-index:10; }
+    .hero-nav { position:relative; z-index:20; display:flex; align-items:center; justify-content:space-between; padding:22px 56px; height:78px; }
+    .nav-logo { font-family:var(--ff-head); font-size:1.25rem; font-weight:900; color:var(--white); text-decoration:none; letter-spacing:0.02em; }
+    .nav-logo span { color:var(--gold); }
+    .nav-links { display:flex; gap:40px; list-style:none; }
+    .nav-links a { color:rgba(255,255,255,0.70); text-decoration:none; font-size:0.82rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; transition:color 0.2s; }
+    .nav-links a:hover { color:var(--white); }
+    .nav-cv { display:inline-flex; align-items:center; gap:10px; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.28); color:var(--white); text-decoration:none; padding:10px 22px; border-radius:8px; font-size:0.78rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; backdrop-filter:blur(8px); transition:all 0.3s; white-space:nowrap; }
+    .nav-cv:hover { background:var(--gold); border-color:var(--gold); color:#080c12; }
+    .hero-content { position:relative; z-index:10; flex:1; display:flex; flex-direction:column; justify-content:center; padding:20px 56px 0 56px; max-width:640px; }
+    .hero-greeting { display:flex; align-items:center; gap:10px; font-size:1.1rem; font-weight:500; color:var(--off-white); margin-bottom:10px; animation:fadeUp .6s ease both .1s; }
+    .hero-greeting .hi-accent { color:var(--gold); font-weight:700; }
+    .hero-name { font-family:var(--ff-head); font-size:clamp(3.4rem,6.5vw,6.2rem); font-weight:900; line-height:0.95; color:var(--white); letter-spacing:-0.03em; margin-bottom:20px; animation:fadeUp .6s ease both .22s; }
+    .hero-subtitle { display:flex; align-items:center; gap:12px; font-size:1rem; font-weight:500; color:var(--off-white); margin-bottom:22px; flex-wrap:wrap; animation:fadeUp .6s ease both .34s; }
+    .hero-subtitle .bull { color:var(--gold); font-size:1.2rem; }
+    .hero-desc { font-size:0.97rem; line-height:1.82; color:var(--muted); margin-bottom:36px; max-width:460px; animation:fadeUp .6s ease both .44s; }
+    .hero-ctas { display:flex; gap:16px; flex-wrap:wrap; animation:fadeUp .6s ease both .54s; }
+    .btn-gold { display:inline-flex; align-items:center; gap:10px; background:var(--gold); color:#080c12; text-decoration:none; padding:15px 32px; border-radius:8px; font-size:0.82rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; transition:all .3s; border:none; }
+    .btn-gold:hover { background:var(--gold-light); transform:translateY(-2px); box-shadow:0 10px 28px rgba(224,169,76,0.4); }
+    .btn-outline { display:inline-flex; align-items:center; gap:10px; background:transparent; color:var(--white); text-decoration:none; padding:15px 32px; border-radius:8px; border:1.5px solid rgba(255,255,255,0.32); font-size:0.82rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; transition:all .3s; }
+    .btn-outline:hover { border-color:rgba(255,255,255,0.65); background:rgba(255,255,255,0.06); transform:translateY(-2px); }
+    .hero-stats-row { position:relative; z-index:10; display:flex; gap:52px; padding:40px 56px 52px; animation:fadeUp .6s ease both .7s; }
+    .h-stat { display:flex; flex-direction:column; gap:2px; }
+    .h-stat-icon { color:var(--gold); font-size:1.1rem; margin-bottom:6px; }
+    .h-stat-num { font-family:var(--ff-head); font-size:2.1rem; font-weight:800; color:var(--white); line-height:1; }
+    .h-stat-lbl { font-size:0.75rem; color:var(--dim); text-transform:uppercase; letter-spacing:0.1em; }
+    .available-badge { position:absolute; bottom:52px; right:56px; z-index:20; background:rgba(8,10,16,0.82); border:1px solid rgba(255,255,255,0.12); backdrop-filter:blur(20px); padding:14px 18px; border-radius:14px; min-width:220px; box-shadow:0 8px 32px rgba(0,0,0,0.5); animation:fadeUp .6s ease both .9s; }
+    .badge-top { display:flex; align-items:center; gap:9px; font-size:0.85rem; font-weight:700; color:var(--white); margin-bottom:5px; }
+    .dot-green { width:9px; height:9px; border-radius:50%; background:#22c55e; box-shadow:0 0 0 3px rgba(34,197,94,0.22); flex-shrink:0; animation:pulse-green 2s ease-in-out infinite; }
+    @keyframes pulse-green { 0%,100%{box-shadow:0 0 0 3px rgba(34,197,94,0.22);} 50%{box-shadow:0 0 0 7px rgba(34,197,94,0.07);} }
+    .badge-sub { font-size:0.76rem; color:rgba(255,255,255,0.42); display:flex; align-items:center; gap:6px; }
+    .zap { color:var(--gold); }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(22px);} to{opacity:1;transform:translateY(0);} }
+
+    /* ── STICKY NAV ── */
+    .sticky-nav { position:fixed; top:0; left:0; right:0; z-index:100; display:flex; align-items:center; justify-content:space-between; padding:0 56px; height:66px; background:rgba(8,10,15,0.82); backdrop-filter:blur(18px); border-bottom:1px solid rgba(255,255,255,0.07); transition:background 0.3s, box-shadow 0.3s; }
+    .sticky-nav.scrolled { background:rgba(8,10,15,0.97); box-shadow:0 4px 24px rgba(0,0,0,0.4); }
+    .sticky-nav.at-top { opacity:0; pointer-events:none; transform:translateY(-100%); transition:opacity 0.25s, transform 0.25s; }
+    .sticky-nav:not(.at-top) { opacity:1; pointer-events:auto; transform:translateY(0); transition:opacity 0.25s, transform 0.25s, background 0.3s, box-shadow 0.3s; }
+    .sticky-nav .nav-logo { font-family:var(--ff-head); font-size:1.1rem; font-weight:900; color:var(--white); text-decoration:none; }
+    .sticky-nav .nav-logo span { color:var(--gold); }
+    .sticky-nav .nav-links { display:flex; gap:36px; list-style:none; }
+    .sticky-nav .nav-links a { color:rgba(255,255,255,0.60); text-decoration:none; font-size:0.78rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; transition:color 0.2s; position:relative; padding-bottom:3px; }
+    .sticky-nav .nav-links a::after { content:''; position:absolute; bottom:0; left:0; width:0; height:1px; background:var(--gold); transition:width 0.25s; }
+    .sticky-nav .nav-links a:hover, .sticky-nav .nav-links a.active { color:var(--white); }
+    .sticky-nav .nav-links a.active::after, .sticky-nav .nav-links a:hover::after { width:100%; }
+    .sticky-nav .nav-cv { display:inline-flex; align-items:center; gap:8px; background:rgba(224,169,76,0.1); border:1.5px solid rgba(224,169,76,0.35); color:var(--gold-light); text-decoration:none; padding:8px 18px; border-radius:8px; font-size:0.74rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; transition:all 0.3s; }
+    .sticky-nav .nav-cv:hover { background:var(--gold); border-color:var(--gold); color:#080c12; }
+
+    /* ── BODY SHELL ── */
+    .themed-body { position:relative; padding-top:26px; z-index:2; }
+    main { max-width:none; margin:0; padding:50px 56px 80px; display:flex; flex-direction:column; gap:64px; }
+
+    /* ── RIGHT-SIDE VIDEO BACKGROUND ── */
+    .bg-video-wrap {
       position: fixed;
       top: 0;
-      left: 0;
       right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 56px;
-      height: 68px;
-      background: rgba(8,10,15,0.82);
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      transition: background 0.3s, box-shadow 0.3s;
-    }
-
-    .sticky-nav.scrolled {
-      background: rgba(8,10,15,0.96);
-      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
-    }
-
-    /* Hide sticky nav when at very top (hero nav is visible) */
-    .sticky-nav.at-top {
-      opacity: 0;
+      width: 42%;
+      height: 100%;
+      z-index: -1;
       pointer-events: none;
-      transform: translateY(-100%);
-      transition: opacity 0.25s, transform 0.25s, background 0.3s;
+      overflow: hidden;
+      opacity: 0;
+      transition: opacity 0.6s ease;
     }
 
-    .sticky-nav:not(.at-top) {
+    .bg-video-wrap.visible {
       opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
-      transition: opacity 0.25s, transform 0.25s, background 0.3s, box-shadow 0.3s;
     }
 
-    .sticky-nav .nav-logo {
-      font-family: var(--ff-head);
-      font-size: 1.1rem;
-      font-weight: 900;
-      color: var(--white);
-      text-decoration: none;
-      letter-spacing: 0.02em;
+    main { position: relative; z-index: 4; }
+
+    .bg-video-wrap video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      opacity: 0.52;
+      filter: saturate(1.0) brightness(0.82);
     }
 
-    .sticky-nav .nav-logo span { color: var(--gold); }
-
-    .sticky-nav .nav-links {
-      display: flex;
-      gap: 36px;
-      list-style: none;
-    }
-
-    .sticky-nav .nav-links a {
-      color: rgba(255,255,255,0.65);
-      text-decoration: none;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      position: relative;
-      padding-bottom: 3px;
-    }
-
-    .sticky-nav .nav-links a::after {
+    /* Fade from left — blends into the dark content area */
+    .bg-video-wrap::before {
       content: '';
       position: absolute;
-      bottom: 0; left: 0;
-      width: 0; height: 1px;
-      background: var(--gold);
-      transition: width 0.25s;
+      inset: 0;
+      background: linear-gradient(
+        to right,
+        #07090e 0%,
+        rgba(7,9,14,0.5) 12%,
+        rgba(7,9,14,0.0) 32%,
+        rgba(7,9,14,0.0) 100%
+      );
+      z-index: 2;
     }
 
-    .sticky-nav .nav-links a:hover,
-    .sticky-nav .nav-links a.active { color: var(--white); }
-
-    .sticky-nav .nav-links a.active::after,
-    .sticky-nav .nav-links a:hover::after { width: 100%; }
-
-    .sticky-nav .nav-cv {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(224,169,76,0.12);
-      border: 1.5px solid rgba(224,169,76,0.4);
-      color: var(--gold-light);
-      text-decoration: none;
-      padding: 8px 18px;
-      border-radius: 8px;
-      font-size: 0.74rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: all 0.3s;
-      white-space: nowrap;
+    /* Fade from top and bottom */
+    .bg-video-wrap::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(7,9,14,0.3) 0%,
+        transparent 10%,
+        transparent 88%,
+        rgba(7,9,14,0.3) 100%
+      );
+      z-index: 2;
     }
 
-    .sticky-nav .nav-cv:hover {
-      background: var(--gold);
-      border-color: var(--gold);
-      color: #080c12;
-    }
+    /* ── REVEAL ── */
+    .reveal { opacity:0; transform:translateY(28px); transition:opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1); will-change:opacity,transform; }
+    .reveal.visible { opacity:1 !important; transform:translateY(0) !important; }
 
-    @media (max-width: 1024px) {
-      .sticky-nav { padding: 0 36px; }
-    }
+    /* ══════════════════════════════════════════
+       SHARED SECTION CHROME
+    ══════════════════════════════════════════ */
+    .sec-tag { display:inline-flex; align-items:center; gap:5px; font-family:var(--ff-mono); font-size:0.67rem; color:var(--neon); background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.14); border-radius:999px; padding:3px 10px; margin-bottom:10px; letter-spacing:0.1em; text-transform:uppercase; }
+    .sec-tag::before { content:''; width:4px; height:4px; border-radius:50%; background:var(--neon); }
+    .sec-heading { font-family:var(--ff-head); font-size:1.6rem; font-weight:800; color:var(--white); margin-bottom:24px; padding-bottom:14px; letter-spacing:-0.025em; position:relative; }
+    .sec-heading::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:1px; background:linear-gradient(90deg, rgba(224,169,76,0.38), rgba(0,229,255,0.07), transparent); }
+    .sec-heading::before { content:''; position:absolute; bottom:0; left:0; width:34px; height:1px; background:var(--neon); opacity:0.45; }
 
-    @media (max-width: 768px) {
-      .sticky-nav { padding: 0 18px; height: 58px; }
-      .sticky-nav .nav-links { gap: 20px; }
-      .sticky-nav .nav-links a { font-size: 0.72rem; }
-    }
+    /* ══════════════════════════════════════════
+       A — PROFESSIONAL SUMMARY
+       Sidebar accent + prose + tag pills + tool strip
+    ══════════════════════════════════════════ */
+    #summary .summary-inner { display:grid; grid-template-columns:3px 1fr; gap:0 20px; }
+    #summary .summary-rail { background:linear-gradient(to bottom, var(--gold), rgba(224,169,76,0.08)); border-radius:2px; }
+    #summary p { font-size:0.93rem; line-height:1.82; color:var(--muted); margin-bottom:14px; }
+    #summary .key-pills { display:flex; flex-wrap:wrap; gap:7px; margin:16px 0; }
+    #summary .key-pill { font-size:0.78rem; font-family:var(--ff-mono); color:var(--gold); background:rgba(224,169,76,0.07); border:1px solid rgba(224,169,76,0.22); padding:4px 12px; border-radius:7px; }
+    #summary .tool-strip { margin-top:4px; padding:12px 16px; background:rgba(0,229,255,0.04); border:1px solid rgba(0,229,255,0.12); border-radius:9px; font-family:var(--ff-mono); font-size:0.8rem; color:var(--muted); }
+    #summary .tool-strip span { color:var(--neon); }
 
-    @media (max-width: 600px) {
-      .sticky-nav .nav-links { display: none; }
-      .sticky-nav .nav-cv span { display: none; }
-    }
+    /* ══════════════════════════════════════════
+       TIMELINE RAIL — EXPERIENCE ONLY
+    ══════════════════════════════════════════ */
+    .tl-wrap { display:flex; flex-direction:column; gap:0; }
+    .job-block { display:grid; grid-template-columns:16px 1fr; gap:0 20px; margin-bottom:32px; }
+    .job-block:last-child { margin-bottom:0; }
+    .job-rail { display:flex; flex-direction:column; align-items:center; }
+    .job-dot { width:11px; height:11px; border-radius:50%; background:var(--gold); flex-shrink:0; margin-top:4px; box-shadow:0 0 0 3px rgba(224,169,76,0.15); }
+    .job-dot.dim { background:rgba(224,169,76,0.35); box-shadow:none; }
+    .job-dot.dimmer { background:rgba(224,169,76,0.18); box-shadow:none; }
+    .job-sub-line { width:1px; flex:1; background:rgba(224,169,76,0.14); min-height:20px; }
+    .job-title { font-family:var(--ff-head); font-size:1.15rem; font-weight:700; color:var(--white); margin-bottom:4px; letter-spacing:-0.02em; }
+    .company { font-size:0.87rem; color:var(--gold); font-weight:600; margin-bottom:8px; }
+    .dates { display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,0.52); font-family:var(--ff-mono); font-size:0.72rem; margin-bottom:14px; padding:5px 12px; background:rgba(255,255,255,0.04); border-radius:999px; border:1px solid rgba(255,255,255,0.07); }
+    .dates::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--gold); box-shadow:0 0 5px rgba(224,169,76,0.5); }
+    .current-badge { display:inline-flex; align-items:center; gap:5px; font-family:var(--ff-mono); font-size:0.65rem; color:#22c55e; background:rgba(34,197,94,0.08); border:1px solid rgba(34,197,94,0.25); border-radius:999px; padding:3px 9px; margin-left:8px; vertical-align:middle; }
+    .current-badge::before { content:''; width:5px; height:5px; border-radius:50%; background:#22c55e; animation:pulse-green 2s ease-in-out infinite; }
+    .cat-head { font-size:0.70rem; color:var(--neon); font-weight:600; font-family:var(--ff-mono); text-transform:uppercase; letter-spacing:0.13em; display:flex; align-items:center; gap:8px; margin:16px 0 9px; opacity:0.78; }
+    .cat-head::before { content:''; display:inline-block; width:14px; height:1px; background:var(--neon); }
+    ul { list-style:none; padding-left:0; }
+    li { margin-bottom:9px; line-height:1.68; color:var(--muted); position:relative; padding-left:18px; font-size:0.9rem; }
+    li::before { content:'▹'; position:absolute; left:0; color:var(--gold); font-family:var(--ff-mono); font-size:0.9rem; line-height:1.2; }
+    strong { color:var(--off-white); font-weight:600; }
 
+    /* ══════════════════════════════════════════
+       B — ACHIEVEMENTS — Numbered Impact Cards
+    ══════════════════════════════════════════ */
+    .achieve-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:12px; }
+    .achieve-card { display:flex; align-items:flex-start; gap:14px; padding:16px 18px; border:1px solid rgba(255,255,255,0.07); border-radius:13px; background:rgba(255,255,255,0.02); transition:border-color .25s, background .25s; }
+    .achieve-card:hover { border-color:rgba(224,169,76,0.2); background:rgba(224,169,76,0.025); }
+    .achieve-num { font-family:var(--ff-head); font-size:1.7rem; font-weight:800; color:var(--gold); line-height:1; min-width:34px; flex-shrink:0; }
+    .achieve-text { font-size:0.88rem; color:var(--muted); line-height:1.58; }
+    .achieve-text strong { color:var(--white); font-size:0.9rem; display:block; margin-bottom:2px; }
+
+    /* ══════════════════════════════════════════
+       C — PROJECT — Case Study Card
+    ══════════════════════════════════════════ */
+    .case-card { border:1px solid rgba(255,255,255,0.08); border-radius:15px; overflow:hidden; }
+    .case-header { background:rgba(224,169,76,0.07); border-bottom:1px solid rgba(224,169,76,0.15); padding:15px 20px; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .case-header h3 { font-family:var(--ff-head); font-size:1rem; font-weight:700; color:var(--white); letter-spacing:-0.01em; }
+    .case-badge { font-size:0.68rem; font-family:var(--ff-mono); color:var(--neon); background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.18); padding:3px 10px; border-radius:999px; white-space:nowrap; flex-shrink:0; }
+    .case-body { padding:18px 20px; display:grid; grid-template-columns:1fr 1fr; gap:8px 24px; }
+    .case-item { font-size:0.88rem; color:var(--muted); padding-left:16px; position:relative; line-height:1.55; }
+    .case-item::before { content:'▹'; position:absolute; left:0; color:var(--gold); font-family:var(--ff-mono); font-size:0.88rem; line-height:1.2; }
+
+    /* ══════════════════════════════════════════
+       D — FUNCTIONAL MAPPING — Icon Quad Grid
+    ══════════════════════════════════════════ */
+    .func-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px,1fr)); gap:14px; }
+    .func-card { padding:20px 20px; border:1px solid rgba(255,255,255,0.07); border-radius:14px; background:rgba(255,255,255,0.025); transition:all .25s; }
+    .func-card:hover { border-color:rgba(0,229,255,0.18); background:rgba(0,229,255,0.025); transform:translateY(-3px); }
+    .func-icon { font-size:1.4rem; color:var(--gold); margin-bottom:10px; line-height:1; }
+    .func-name { font-family:var(--ff-head); font-size:0.95rem; font-weight:700; color:var(--white); margin-bottom:9px; }
+    .func-desc { font-size:0.83rem; color:var(--muted); line-height:1.65; }
+
+    /* ══════════════════════════════════════════
+       E — AT A GLANCE — Stat Strip
+    ══════════════════════════════════════════ */
+    .stat-strip { display:flex; border:1px solid rgba(255,255,255,0.08); border-radius:13px; overflow:hidden; margin-bottom:28px; }
+    .stat-cell { flex:1; text-align:center; padding:18px 8px; border-right:1px solid rgba(255,255,255,0.06); }
+    .stat-cell:last-child { border-right:none; }
+    .stat-val { font-family:var(--ff-head); font-size:1.5rem; font-weight:800; color:var(--white); line-height:1; margin-bottom:5px; }
+    .stat-lbl { font-size:0.65rem; font-family:var(--ff-mono); color:var(--dim); text-transform:uppercase; letter-spacing:0.1em; }
+
+    /* ── Dashboard List ── */
+    .dash-section-label { font-size:0.7rem; font-family:var(--ff-mono); color:var(--neon); letter-spacing:0.12em; text-transform:uppercase; opacity:0.72; margin-bottom:12px; }
+    .dash-list { border:1px solid rgba(255,255,255,0.08); border-radius:13px; overflow:hidden; }
+    .dash-row { display:flex; align-items:center; gap:14px; padding:12px 18px; border-bottom:1px solid rgba(255,255,255,0.05); transition:background .2s; }
+    .dash-row:last-child { border-bottom:none; }
+    .dash-row:hover { background:rgba(255,255,255,0.025); }
+    .dash-dot { width:6px; height:6px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+    .dash-name { font-size:0.9rem; color:var(--white); font-weight:500; flex:1; }
+    .dash-tags { font-size:0.7rem; font-family:var(--ff-mono); color:var(--dim); }
+
+    /* ══════════════════════════════════════════
+       F — SKILLS — Grouped Tag Cloud
+    ══════════════════════════════════════════ */
+    .skill-groups { display:flex; flex-direction:column; gap:20px; }
+    .skill-group-label { font-size:0.68rem; font-family:var(--ff-mono); color:var(--dim); text-transform:uppercase; letter-spacing:0.12em; margin-bottom:9px; }
+    .tag-cloud { display:flex; flex-wrap:wrap; gap:7px; }
+    .s-tag { font-size:0.78rem; font-family:var(--ff-mono); padding:5px 12px; border-radius:8px; transition:all .22s; cursor:default; }
+    .s-tag.gray { color:var(--off-white); background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); }
+    .s-tag.gray:hover { background:rgba(255,255,255,0.07); border-color:rgba(255,255,255,0.18); }
+    .s-tag.gold { color:var(--gold); background:rgba(224,169,76,0.06); border:1px solid rgba(224,169,76,0.22); }
+    .s-tag.gold:hover { background:rgba(224,169,76,0.12); }
+    .s-tag.neon { color:var(--neon); background:rgba(0,229,255,0.05); border:1px solid rgba(0,229,255,0.18); }
+    .s-tag.neon:hover { background:rgba(0,229,255,0.1); }
+
+    /* ══════════════════════════════════════════
+       G — EDUCATION — Degree Cards with Score Badge
+    ══════════════════════════════════════════ */
+    .edu-cards { display:flex; flex-direction:column; gap:11px; }
+    .edu-card { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:16px 20px; border-radius:13px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.02); transition:all .25s; }
+    .edu-card.neon-border { border-color:rgba(0,229,255,0.2); background:rgba(0,229,255,0.025); }
+    .edu-card.gold-border { border-color:rgba(224,169,76,0.2); background:rgba(224,169,76,0.025); }
+    .edu-card:hover { transform:translateX(4px); }
+    .edu-main { flex:1; }
+    .edu-degree { font-family:var(--ff-head); font-size:0.98rem; font-weight:700; color:var(--white); margin-bottom:4px; }
+    .edu-inst { font-size:0.82rem; color:var(--gold); margin-bottom:4px; }
+    .edu-inst.cyan { color:var(--neon); }
+    .edu-date { font-size:0.72rem; font-family:var(--ff-mono); color:var(--dim); }
+    .edu-badge { text-align:center; flex-shrink:0; padding:10px 15px; border-radius:10px; min-width:62px; }
+    .edu-badge.neon-bg { background:rgba(0,229,255,0.07); border:1px solid rgba(0,229,255,0.2); }
+    .edu-badge.gold-bg { background:rgba(224,169,76,0.07); border:1px solid rgba(224,169,76,0.2); }
+    .edu-badge.gray-bg { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); }
+    .edu-score { font-family:var(--ff-head); font-size:1.3rem; font-weight:800; color:var(--white); line-height:1; }
+    .edu-score-lbl { font-size:0.63rem; font-family:var(--ff-mono); text-transform:uppercase; letter-spacing:0.1em; margin-top:3px; }
+    .edu-score-lbl.cyan { color:rgba(0,229,255,0.65); }
+    .edu-score-lbl.gray { color:var(--dim); }
+    .edu-active-dot { width:8px; height:8px; border-radius:50%; background:#22c55e; margin:0 auto 3px; }
+    .edu-active-lbl { font-size:0.62rem; font-family:var(--ff-mono); color:#22c55e; text-transform:uppercase; letter-spacing:0.08em; }
+
+    /* ══════════════════════════════════════════
+       H — CONTACT — Compact Table
+    ══════════════════════════════════════════ */
+    .contact-table { border:1px solid rgba(255,255,255,0.08); border-radius:13px; overflow:hidden; }
+    .ct-row { display:flex; align-items:center; gap:16px; padding:13px 20px; border-bottom:1px solid rgba(255,255,255,0.05); transition:background .2s; }
+    .ct-row:last-child { border-bottom:none; }
+    .ct-row:hover { background:rgba(255,255,255,0.025); }
+    .ct-icon { width:28px; text-align:center; color:var(--neon); font-size:0.95rem; flex-shrink:0; }
+    .ct-label { font-size:0.7rem; font-family:var(--ff-mono); color:var(--dim); width:72px; flex-shrink:0; text-transform:uppercase; letter-spacing:0.08em; }
+    .ct-value { font-size:0.9rem; color:var(--off-white); }
+    .ct-value a { color:var(--gold); text-decoration:none; transition:color .2s; }
+    .ct-value a:hover { color:var(--gold-light); }
+
+    /* ── FOOTER ── */
+    footer { max-width:none; margin:0; padding:0 56px 44px; }
+    .footer-line { border-top:1px solid rgba(255,255,255,0.07); padding-top:20px; text-align:center; color:var(--dim); font-size:.8rem; font-family:var(--ff-mono); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:1024px) {
+      .hero-nav,.hero-content,.hero-stats-row{padding-left:36px;padding-right:36px;}
+      .available-badge{right:36px;}
+      .sticky-nav{padding:0 36px;}
+      main{padding-left:36px;padding-right:36px;}
+      footer{padding-left:36px;padding-right:36px;}
+      .bg-video-wrap { width: 38%; }
+    }
+    @media (max-width:768px) {
+      .hero-nav{padding:18px 22px;height:auto;}
+      .nav-links{display:none;}
+      .hero-content{padding:28px 22px 0;max-width:none;}
+      .hero-stats-row{padding:32px 22px 110px;gap:28px;flex-wrap:wrap;}
+      .available-badge{right:22px;left:22px;bottom:28px;min-width:unset;}
+      .hero-bg::after{background:linear-gradient(to right,rgba(5,7,12,0.94) 0%,rgba(5,7,12,0.88) 60%,rgba(5,7,12,0.78) 100%),linear-gradient(to bottom,rgba(5,7,12,0.5) 0%,transparent 20%,transparent 70%,rgba(5,7,12,0.7) 100%);}
+      main{padding:28px 22px 60px;gap:44px;}
+      footer{padding:0 22px 44px;}
+      .sticky-nav{padding:0 18px;height:58px;}
+      .sticky-nav .nav-links{gap:18px;}
+      .stat-strip{flex-wrap:wrap;}
+      .stat-cell{min-width:30%;border-bottom:1px solid rgba(255,255,255,0.06);}
+      .case-body{grid-template-columns:1fr;}
+      .achieve-grid{grid-template-columns:1fr;}
+      .bg-video-wrap { display: none; }
+    }
+    @media (max-width:600px) {
+      .sticky-nav .nav-links{display:none;}
+      .sticky-nav .nav-cv span{display:none;}
+      .edu-card{flex-direction:column;align-items:flex-start;}
+    }
   </style>
 </head>
 <body>
 
-<!-- STICKY NAV (visible when scrolled past hero) -->
+<!-- Background canvas -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- STICKY NAV -->
 <nav class="sticky-nav at-top" id="stickyNav">
   <a href="#home" class="nav-logo">HARSHITH <span>G S</span></a>
   <ul class="nav-links">
@@ -1131,16 +425,14 @@
   </a>
 </nav>
 
-<!-- Floating background words & icons layer -->
-<div class="bg-float-layer" id="bgFloat"></div><div class="bg-float-layer" id="bgFloat"></div>
+<div id="symbolLayer"></div>
 
+<!-- ─── HERO ─── -->
 <section id="home">
   <div class="hero-bg"></div>
   <div class="hero-divider"></div>
-
   <nav class="hero-nav">
     <a href="#home" class="nav-logo">HARSHITH <span>G S</span></a>
-
     <ul class="nav-links">
       <li><a href="#summary">About</a></li>
       <li><a href="#projects">Projects</a></li>
@@ -1148,40 +440,20 @@
       <li><a href="#experience">Experience</a></li>
       <li><a href="#contact">Contact</a></li>
     </ul>
-
     <a href="Harshith_G_S_Resume.pdf" class="nav-cv" download>
       <span>Download CV</span> <i class="fas fa-arrow-down"></i>
     </a>
   </nav>
-
   <div class="hero-content">
-    <div class="hero-greeting">
-      👋 Hi, I'm <span class="hi-accent">&nbsp;</span>
-    </div>
-
+    <div class="hero-greeting">👋 Hi, I'm <span class="hi-accent">&nbsp;</span></div>
     <div class="hero-name">Harshith G S</div>
-
-    <div class="hero-subtitle">
-      Finance
-      <span class="bull">•</span>
-      Accounting
-      <span class="bull">•</span>
-      CA Aspirant
-    </div>
-
-    <p class="hero-desc">
-      I manage accounting, compliance, GST, TDS, reconciliations,
-      payroll, and reporting with a practical, audit-ready approach —
-      keeping books accurate, filings timely, and business decisions
-      well-supported.
-    </p>
-
+    <div class="hero-subtitle">Finance <span class="bull">•</span> Accounting <span class="bull">•</span> CA Aspirant</div>
+    <p class="hero-desc">I manage accounting, compliance, GST, TDS, reconciliations, payroll, and reporting with a practical, audit-ready approach — keeping books accurate, filings timely, and business decisions well-supported.</p>
     <div class="hero-ctas">
       <a href="#experience" class="btn-gold">View My Work &nbsp;→</a>
       <a href="#contact" class="btn-outline">Contact Me &nbsp;↗</a>
     </div>
   </div>
-
   <div class="hero-stats-row">
     <div class="h-stat">
       <div class="h-stat-icon"><i class="fa-solid fa-file-invoice"></i></div>
@@ -1196,492 +468,943 @@
     <div class="h-stat">
       <div class="h-stat-icon"><i class="fa-solid fa-briefcase"></i></div>
       <div class="h-stat-num">2+</div>
-      <div class="h-stat-lbl">Years of Experience</div>
+      <div class="h-stat-lbl">Years Experience</div>
     </div>
   </div>
-
   <div class="available-badge">
-    <div class="badge-top">
-      <span class="dot-green"></span>
-      Available for Opportunities
-    </div>
-    <div class="badge-sub">
-      <span class="zap">⚡</span>
-      Let's build something great!
-    </div>
+    <div class="badge-top"><span class="dot-green"></span>Available for Opportunities</div>
+    <div class="badge-sub"><span class="zap">⚡</span>Let's build something great!</div>
   </div>
 </section>
 
 <div class="themed-body">
+
+  <!-- Right-side video background -->
+  <div class="bg-video-wrap">
+    <video autoplay muted loop playsinline>
+      <source src="my-space.mp4" type="video/mp4">
+    </video>
+  </div>
+
   <main>
 
-    <!-- PROFESSIONAL SUMMARY -->
-    <section id="summary" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">overview</div>
-        <h2><i class="fas fa-terminal"></i> Professional Summary</h2>
-        <p>I'm a Finance and Accounting professional with hands-on experience in managing end-to-end accounting, taxation, and compliance functions across multiple clients. Currently working as an Accountant, I handle core areas including bookkeeping, GST compliance, TDS filing, payroll processing, reconciliations, and financial reporting.</p>
-        <p>I specialize in ensuring accuracy and compliance while dealing with real-world challenges such as TDS mismatches, delayed filings, and client coordination. My role involves not just execution, but also proactive follow-ups, issue resolution, and maintaining audit-ready documentation.</p>
-
-        <p class="highlight-text">Key areas of expertise:</p>
-        <ul>
-          <li class="reveal">GST (GSTR-1, GSTR-3B, 2A/2B Reconciliation)</li>
-          <li class="reveal">TDS Compliance & Return Filing</li>
-          <li class="reveal">Bookkeeping & Month-End Close</li>
-          <li class="reveal">MIS & Financial Analysis</li>
-          <li class="reveal">Payroll Processing</li>
-          <li class="reveal">Client Coordination & Compliance Follow-ups</li>
-        </ul>
-
-        <p style="margin-top:20px;">I am currently pursuing CA, continuously building my knowledge in taxation, financial reporting, and audit. I enjoy working in fast-paced environments where I can take ownership, solve practical problems, and contribute to efficient financial processes.</p>
-
-        <div class="info-strip">
-          <span>Tools & Systems:</span>&nbsp; MS Excel &nbsp;|&nbsp; Zoho Books &nbsp;|&nbsp; ERPNext (Frappe) &nbsp;|&nbsp; Power BI &nbsp;|&nbsp; Razorpay
+    <!-- ══════ A — PROFESSIONAL SUMMARY ══════ -->
+    <section id="summary" class="reveal">
+      <div class="sec-tag">overview</div>
+      <div class="sec-heading">Professional Summary</div>
+      <div class="summary-inner">
+        <div class="summary-rail"></div>
+        <div>
+          <p>Finance and Accounting professional with hands-on experience in managing end-to-end accounting, taxation, and compliance functions across multiple clients. I handle core areas including bookkeeping, GST compliance, TDS filing, payroll processing, reconciliations, and financial reporting.</p>
+          <p>I specialize in ensuring accuracy and compliance while navigating real-world challenges — TDS mismatches, delayed filings, client coordination — with proactive follow-ups, issue resolution, and audit-ready documentation.</p>
+          <p style="margin-bottom:4px;">Currently pursuing CA, continuously building my knowledge in taxation, financial reporting, and audit. I thrive in fast-paced environments where I can take ownership and contribute to efficient financial processes.</p>
+          <div class="key-pills">
+            <span class="key-pill">GST &amp; TDS</span>
+            <span class="key-pill">Bookkeeping</span>
+            <span class="key-pill">Month-End Close</span>
+            <span class="key-pill">MIS &amp; Analytics</span>
+            <span class="key-pill">Payroll</span>
+            <span class="key-pill">Reconciliation</span>
+            <span class="key-pill">Client Coordination</span>
+          </div>
+          <div class="tool-strip"><span>Tools &amp; Systems:</span>&nbsp; MS Excel &nbsp;|&nbsp; Zoho Books &nbsp;|&nbsp; ERPNext (Frappe) &nbsp;|&nbsp; Power BI &nbsp;|&nbsp; Razorpay</div>
         </div>
       </div>
     </section>
 
-    <!-- WORK EXPERIENCE -->
-    <section id="experience" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">career timeline</div>
-        <h2><i class="fas fa-briefcase"></i> Work Experience</h2>
+    <!-- ══════ TIMELINE RAIL — EXPERIENCE ══════ -->
+    <section id="experience" class="reveal">
+      <div class="sec-tag">career timeline</div>
+      <div class="sec-heading">Work Experience</div>
+      <div class="tl-wrap">
 
-        <div class="job-entry reveal">
-          <h3 class="job-title">Accounts and Finance Operations</h3>
-          <div class="company"><i class="fas fa-building" style="font-size:0.85rem;opacity:0.6;margin-right:6px;"></i>Brandshark</div>
-          <div class="dates">Feb 2026 – Present</div>
-          <ul>
-            <div class="category-header reveal">Financial Operations & Reporting</div>
-            <li class="reveal"><strong>End-to-End Accounting Oversight:</strong> Orchestrate full-cycle accounting for a diverse portfolio of clients, ensuring 100% accuracy and integrity in financial transaction recording and reporting.</li>
-            <li class="reveal"><strong>Month-End Mastery:</strong> Lead the month-end closing process by executing complex adjustment entries, ledger reviews, and the finalization of comprehensive financial statements.</li>
-            <li class="reveal"><strong>Actionable MIS & Analytics:</strong> Architect and present high-level MIS reports and analytical dashboards, translating raw data into strategic insights that drive management decision-making.</li>
-            <li class="reveal"><strong>Cash Management:</strong> Exercise rigorous control over cash flow and petty cash cycles, maintaining audit-ready documentation and robust internal safeguards.</li>
-
-            <div class="category-header reveal">Taxation & Statutory Compliance</div>
-            <li class="reveal"><strong>GST Lifecycle Management:</strong> Manage the end-to-end GST framework, including the seamless filing of GSTR-1 and GSTR-3B, and performing meticulous GSTR-2A/2B reconciliations to maximize Input Tax Credit (ITC).</li>
-            <li class="reveal"><strong>TDS Administration:</strong> Execute the full TDS compliance cycle—from computation and challan preparation to return filing—ensuring proactive resolution of discrepancies for accurate tax credit reflection.</li>
-            <li class="reveal"><strong>Payroll & Labor Compliance:</strong> Oversee payroll operations, ensuring precise salary computations and strict adherence to statutory deductions (PF, ESI, PT) and filing within due date and evolving labor regulations.</li>
-
-            <div class="category-header reveal">Process Excellence & Client Success</div>
-            <li class="reveal"><strong>Zoho Books Optimization:</strong> Administer and refine accounting workflows within Zoho Books, enforcing structured documentation standards and alignment with international accounting benchmarks.</li>
-            <li class="reveal"><strong>Financial Reconciliation & Integrity:</strong> Perform deep-dive reconciliations across multiple accounts, identifying systemic discrepancies and implementing corrective actions to eliminate financial risk.</li>
-            <li class="reveal"><strong>Strategic Client Onboarding:</strong> Partner with clients to structure and finalize project agreements, ensuring all commercial terms and regulatory requirements are harmonized with internal compliance policies.</li>
-          </ul>
-        </div>
-
-        <div class="job-entry reveal">
-          <h3 class="job-title">Accounts Executive</h3>
-          <div class="company"><i class="fas fa-building" style="font-size:0.85rem;opacity:0.6;margin-right:6px;"></i>Karthika Consulting and Solutions Pvt Ltd</div>
-          <div class="dates">Sept 2024 – Dec 2025</div>
-          <ul>
-            <li class="reveal">Managed daily bookkeeping and supported Accounts Payable and Accounts Receivable operations.</li>
-            <li class="reveal">Prepared and filed GST returns (GSTR-1, GSTR-3B) and performed GSTR-2A/2B reconciliations.</li>
-            <li class="reveal">Conducted monthly bank reconciliations to ensure accuracy of ledgers.</li>
-            <li class="reveal">Supported month-end close activities by completing reconciliations and updating financial schedules.</li>
-            <li class="reveal">Maintained accurate ledgers in Frappe ERP (ERPNext) ensuring compliance with accounting standards.</li>
-            <li class="reveal">Handled fixed asset accounting, depreciation posting, and asset register maintenance.</li>
-            <li class="reveal">Prepared daily, weekly, and monthly MIS and revenue reports.</li>
-            <li class="reveal">Maintained petty cash expenses and supported audit documentation.</li>
-          </ul>
-        </div>
-
-        <div class="job-entry reveal">
-          <h3 class="job-title">Finance Intern</h3>
-          <div class="company"><i class="fas fa-building" style="font-size:0.85rem;opacity:0.6;margin-right:6px;"></i>Cynaris Solutions Pvt Ltd</div>
-          <div class="dates">Apr 2024 – May 2024</div>
-          <ul>
-            <li class="reveal">Processed and tracked invoices, TDS workings, and assisted in budget preparation.</li>
-            <li class="reveal">Supported the finance team in accurate GST compliance and filings.</li>
-            <li class="reveal">Assisted with reconciliations and updating financial records using Excel and Power BI.</li>
-          </ul>
-        </div>
-
-        <div class="job-entry reveal">
-          <h3 class="job-title">Accounts & Store Operations</h3>
-          <div class="company"><i class="fas fa-store" style="font-size:0.85rem;opacity:0.6;margin-right:6px;"></i>GS Provision Stores</div>
-          <div class="dates">July 2020 – Sept 2023</div>
-          <ul>
-            <li class="reveal">Prepared and generated customer bills accurately on a daily basis.</li>
-            <li class="reveal">Recorded and maintained daily sales entries in ledger books.</li>
-            <li class="reveal">Managed and updated stock statements ensuring accurate inventory tracking.</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- KEY ACHIEVEMENTS -->
-    <section id="achievements" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">impact metrics</div>
-        <h2><i class="fas fa-bolt"></i> Key Achievements</h2>
-        <div class="achievements-grid">
-          <div class="achieve-item reveal"><strong>Processed and reconciled 100+ customer and vendor invoices per month</strong> with high accuracy.</div>
-          <div class="achieve-item reveal"><strong>Improved AR collections efficiency by ~20%</strong> through timely follow-ups and aging analysis.</div>
-          <div class="achieve-item reveal"><strong>Completed monthly bank reconciliations with 100% accuracy</strong>, ensuring error-free ledgers.</div>
-          <div class="achieve-item reveal"><strong>Supported GST filings (GSTR-1, GSTR-3B, 2A/2B)</strong> with zero late-fee instances during tenure.</div>
-          <div class="achieve-item reveal"><strong>Reduced invoice discrepancies by 25%</strong> by strengthening PO–GRN–Invoice verification.</div>
-          <div class="achieve-item reveal"><strong>Maintained inventory records for 50+ SKUs</strong>, supporting accurate stock reporting.</div>
-          <div class="achieve-item reveal"><strong>Contributed to on-time month-end closing</strong> by preparing schedules ahead of deadlines.</div>
-          <div class="achieve-item reveal"><strong>Automated MIS and reports using Excel & Power BI</strong>, reducing manual effort by 30%.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- KEY PROJECT -->
-    <section id="projects" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">project</div>
-        <h2><i class="fas fa-code-branch"></i> Key Accounting Project</h2>
-        <h3 class="job-title" style="margin-bottom:16px;">End-to-End Accounting Operations Project (ERP-Based)</h3>
-        <ul>
-          <li class="reveal">Prepared customer invoices, tracked dispatch, and maintained AR aging reports.</li>
-          <li class="reveal">Supported customer ledger reconciliation and followed up on outstanding receivables.</li>
-          <li class="reveal">Processed vendor invoices by verifying PO, GRN, and supporting documents.</li>
-          <li class="reveal">Performed vendor statement reconciliation and resolved discrepancies.</li>
-          <li class="reveal">Maintained inventory records and performed stock & job-worker reconciliations.</li>
-          <li class="reveal">Posted routine journal entries and supported month-end closing activities.</li>
-          <li class="reveal">Assisted in GST and TDS compliance and compiled audit documentation.</li>
-          <li class="reveal">Coordinated with Sales, Sourcing, and Operations teams for accounting clarifications.</li>
-        </ul>
-      </div>
-    </section>
-
-    <!-- FUNCTIONAL MAPPING -->
-    <section id="functional" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">functional map</div>
-        <h2><i class="fas fa-network-wired"></i> Functional Experience Mapping</h2>
-        <div class="dashboard-grid">
-          <div class="func-card reveal">
-            <h3><i class="fas fa-arrow-circle-right"></i> Accounts Receivable (AR)</h3>
+        <!-- Job 1 -->
+        <div class="job-block reveal">
+          <div class="job-rail"><div class="job-dot"></div><div class="job-sub-line"></div></div>
+          <div>
+            <div class="job-title">Accounts and Finance Operations <span class="current-badge">Current</span></div>
+            <div class="company"><i class="fas fa-building" style="font-size:.8rem;opacity:.5;margin-right:6px;"></i>Brandshark</div>
+            <div class="dates">Feb 2026 – Present</div>
             <ul>
-              <li><strong>Revenue Cycle:</strong> End-to-end customer invoicing and dispatch tracking.</li>
-              <li><strong>Aging Management:</strong> Proactive follow-ups and aging analysis to optimize cash flow.</li>
-              <li><strong>Reconciliation:</strong> Meticulous customer account and GST audit schedule preparation.</li>
+              <div class="cat-head">Financial Operations &amp; Reporting</div>
+              <li class="reveal"><strong>End-to-End Accounting:</strong> Full-cycle accounting for a diverse portfolio of clients, ensuring 100% accuracy in transaction recording and reporting.</li>
+              <li class="reveal"><strong>Month-End Mastery:</strong> Lead the close process — adjustment entries, ledger reviews, finalization of financial statements.</li>
+              <li class="reveal"><strong>Actionable MIS &amp; Analytics:</strong> High-level MIS reports and analytical dashboards translating raw data into management insights.</li>
+              <li class="reveal"><strong>Cash Management:</strong> Rigorous control over cash flow and petty cash with audit-ready documentation.</li>
+              <div class="cat-head">Taxation &amp; Statutory Compliance</div>
+              <li class="reveal"><strong>GST Lifecycle:</strong> End-to-end GST framework — GSTR-1, GSTR-3B, and GSTR-2A/2B reconciliations to maximise ITC.</li>
+              <li class="reveal"><strong>TDS Administration:</strong> Full TDS cycle — computation, challan prep, return filing, and discrepancy resolution.</li>
+              <li class="reveal"><strong>Payroll &amp; Labour Compliance:</strong> Precise salary computations with PF, ESI, PT deductions filed within due dates.</li>
+              <div class="cat-head">Process Excellence &amp; Client Success</div>
+              <li class="reveal"><strong>Zoho Books Optimization:</strong> Administer accounting workflows, enforcing documentation standards aligned with international benchmarks.</li>
+              <li class="reveal"><strong>Financial Reconciliation:</strong> Deep-dive reconciliations identifying systemic discrepancies and implementing corrective actions.</li>
+              <li class="reveal"><strong>Strategic Client Onboarding:</strong> Structure project agreements ensuring commercial terms align with compliance policies.</li>
             </ul>
           </div>
-          <div class="func-card reveal">
-            <h3><i class="fas fa-arrow-circle-left"></i> Accounts Payable (AP)</h3>
+        </div>
+
+        <!-- Job 2 -->
+        <div class="job-block reveal">
+          <div class="job-rail"><div class="job-dot dim"></div><div class="job-sub-line"></div></div>
+          <div>
+            <div class="job-title">Accounts Executive</div>
+            <div class="company"><i class="fas fa-building" style="font-size:.8rem;opacity:.5;margin-right:6px;"></i>Karthika Consulting and Solutions Pvt Ltd</div>
+            <div class="dates">Sept 2024 – Dec 2025</div>
             <ul>
-              <li><strong>Three-Way Match:</strong> Verification of PO, GRN, and Invoices for payment accuracy.</li>
-              <li><strong>Vendor Management:</strong> Procurement coordination and dispute resolution.</li>
-              <li><strong>Compliance:</strong> Rigorous AP audit documentation and internal control adherence.</li>
+              <li class="reveal">Managed daily bookkeeping and supported Accounts Payable and Accounts Receivable operations.</li>
+              <li class="reveal">Prepared and filed GST returns (GSTR-1, GSTR-3B) and performed GSTR-2A/2B reconciliations.</li>
+              <li class="reveal">Conducted monthly bank reconciliations to ensure accuracy of ledgers.</li>
+              <li class="reveal">Supported month-end close by completing reconciliations and updating financial schedules.</li>
+              <li class="reveal">Maintained accurate ledgers in Frappe ERP (ERPNext) ensuring compliance with accounting standards.</li>
+              <li class="reveal">Handled fixed asset accounting, depreciation posting, and asset register maintenance.</li>
+              <li class="reveal">Prepared daily, weekly, and monthly MIS and revenue reports.</li>
+              <li class="reveal">Maintained petty cash expenses and supported audit documentation.</li>
             </ul>
           </div>
-          <div class="func-card reveal">
-            <h3><i class="fas fa-boxes-stacked"></i> Inventory & GL</h3>
+        </div>
+
+        <!-- Job 3 -->
+        <div class="job-block reveal">
+          <div class="job-rail"><div class="job-dot dimmer"></div><div class="job-sub-line"></div></div>
+          <div>
+            <div class="job-title">Finance Intern</div>
+            <div class="company"><i class="fas fa-building" style="font-size:.8rem;opacity:.5;margin-right:6px;"></i>Cynaris Solutions Pvt Ltd</div>
+            <div class="dates">Apr 2024 – May 2024</div>
             <ul>
-              <li><strong>Asset Integrity:</strong> Inventory record maintenance and cycle count reconciliation.</li>
-              <li><strong>Financial Closing:</strong> Journal entry posting and GL-to-sub-ledger schedules.</li>
-              <li><strong>ERP Mastery:</strong> Data management and ledger accuracy within Frappe/Zoho.</li>
+              <li class="reveal">Processed and tracked invoices, TDS workings, and assisted in budget preparation.</li>
+              <li class="reveal">Supported the finance team in accurate GST compliance and filings.</li>
+              <li class="reveal">Assisted with reconciliations and updating financial records using Excel and Power BI.</li>
             </ul>
           </div>
-          <div class="func-card reveal">
-            <h3><i class="fas fa-file-contract"></i> Compliance & Reporting</h3>
+        </div>
+
+        <!-- Job 4 -->
+        <div class="job-block reveal">
+          <div class="job-rail"><div class="job-dot dimmer" style="background:rgba(224,169,76,0.12);"></div><div class="job-sub-line" style="min-height:0;"></div></div>
+          <div>
+            <div class="job-title">Accounts &amp; Store Operations</div>
+            <div class="company"><i class="fas fa-store" style="font-size:.8rem;opacity:.5;margin-right:6px;"></i>GS Provision Stores</div>
+            <div class="dates">July 2020 – Sept 2023</div>
             <ul>
-              <li>Managed GST & TDS compliance tracking and follow-ups.</li>
-              <li>Prepared MIS reports and financial analysis for management.</li>
-              <li>Supported audit processes with structured documentation.</li>
+              <li class="reveal">Prepared and generated customer bills accurately on a daily basis.</li>
+              <li class="reveal">Recorded and maintained daily sales entries in ledger books.</li>
+              <li class="reveal">Managed and updated stock statements ensuring accurate inventory tracking.</li>
             </ul>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- AT A GLANCE -->
-    <section id="glance" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">numbers</div>
-        <h2><i class="fa-solid fa-gauge-high"></i> At a Glance</h2>
-        <div class="glance-grid">
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-file-invoice"></i></div>
-            <div class="dash-value">200+</div>
-            <div class="dash-label">Invoices/Month</div>
+    <!-- ══════ B — KEY ACHIEVEMENTS ══════ -->
+    <section id="achievements" class="reveal">
+      <div class="sec-tag">impact metrics</div>
+      <div class="sec-heading">Key Achievements</div>
+      <div class="achieve-grid">
+        <div class="achieve-card reveal"><div class="achieve-num">01</div><div class="achieve-text"><strong>200+ invoices / month</strong>Reconciled with high accuracy across customer and vendor accounts.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">02</div><div class="achieve-text"><strong>~20% AR improvement</strong>Through timely follow-ups and aging analysis.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">03</div><div class="achieve-text"><strong>100% accurate bank recons</strong>Monthly reconciliations with zero error ledgers throughout tenure.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">04</div><div class="achieve-text"><strong>Zero late-fee filings</strong>GST returns (GSTR-1, 3B, 2A/2B) filed on time across all clients.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">05</div><div class="achieve-text"><strong>–25% invoice discrepancies</strong>By strengthening PO–GRN–Invoice three-way verification.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">06</div><div class="achieve-text"><strong>50+ SKU inventory records</strong>Maintained with accuracy, supporting precise stock reporting.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">07</div><div class="achieve-text"><strong>On-time month-end close</strong>Consistently prepared schedules ahead of deadlines every cycle.</div></div>
+        <div class="achieve-card reveal"><div class="achieve-num">08</div><div class="achieve-text"><strong>–30% manual reporting effort</strong>Automated MIS and dashboards via Excel &amp; Power BI.</div></div>
+      </div>
+    </section>
+
+    <!-- ══════ C — KEY PROJECT ══════ -->
+    <section id="projects" class="reveal">
+      <div class="sec-tag">project</div>
+      <div class="sec-heading">Key Accounting Project</div>
+      <div class="case-card reveal">
+        <div class="case-header">
+          <h3>End-to-End Accounting Operations Project (ERP-Based)</h3>
+          <span class="case-badge">ERP &nbsp;·&nbsp; GST &nbsp;·&nbsp; TDS &nbsp;·&nbsp; AR/AP</span>
+        </div>
+        <div class="case-body">
+          <div class="case-item">Prepared customer invoices, tracked dispatch, and maintained AR aging reports.</div>
+          <div class="case-item">Processed vendor invoices by verifying PO, GRN, and supporting documents.</div>
+          <div class="case-item">Supported customer ledger reconciliation and followed up on outstanding receivables.</div>
+          <div class="case-item">Performed vendor statement reconciliation and resolved discrepancies.</div>
+          <div class="case-item">Maintained inventory records and performed stock &amp; job-worker reconciliations.</div>
+          <div class="case-item">Posted routine journal entries and supported month-end closing activities.</div>
+          <div class="case-item">Assisted in GST and TDS compliance and compiled audit documentation.</div>
+          <div class="case-item">Coordinated with Sales, Sourcing, and Operations for accounting clarifications.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════ D — FUNCTIONAL MAPPING ══════ -->
+    <section id="functional" class="reveal">
+      <div class="sec-tag">functional map</div>
+      <div class="sec-heading">Functional Experience Mapping</div>
+      <div class="func-grid">
+        <div class="func-card reveal">
+          <div class="func-icon">→</div>
+          <div class="func-name">Accounts Receivable</div>
+          <div class="func-desc">Customer invoicing · AR aging · outstanding follow-ups · ledger reconciliation · GST audit schedules</div>
+        </div>
+        <div class="func-card reveal">
+          <div class="func-icon">←</div>
+          <div class="func-name">Accounts Payable</div>
+          <div class="func-desc">PO–GRN–Invoice three-way match · vendor coordination · dispute resolution · AP audit documentation</div>
+        </div>
+        <div class="func-card reveal">
+          <div class="func-icon">⊟</div>
+          <div class="func-name">Inventory &amp; GL</div>
+          <div class="func-desc">Stock records · cycle count recon · journal entry posting · GL-to-subledger schedules · ERP data integrity</div>
+        </div>
+        <div class="func-card reveal">
+          <div class="func-icon">✓</div>
+          <div class="func-name">Compliance &amp; Reporting</div>
+          <div class="func-desc">GST &amp; TDS tracking · MIS reports · financial analysis for management · structured audit documentation</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════ E — AT A GLANCE + MINI DASHBOARDS ══════ -->
+    <section id="glance" class="reveal">
+      <div class="sec-tag">numbers</div>
+      <div class="sec-heading">At a Glance</div>
+      <div class="stat-strip reveal">
+        <div class="stat-cell"><div class="stat-val">200+</div><div class="stat-lbl">Invoices/mo</div></div>
+        <div class="stat-cell"><div class="stat-val">10+</div><div class="stat-lbl">GST Clients</div></div>
+        <div class="stat-cell"><div class="stat-val">100%</div><div class="stat-lbl">On-Time Filing</div></div>
+        <div class="stat-cell"><div class="stat-val">₹1.8L</div><div class="stat-lbl">ITC Recovered</div></div>
+        <div class="stat-cell"><div class="stat-val">–30%</div><div class="stat-lbl">Manual Effort</div></div>
+        <div class="stat-cell"><div class="stat-val">08h/day</div><div class="stat-lbl">Study Discipline</div></div>
+      </div>
+      <div class="dash-section-label">// Mini Finance Dashboards</div>
+      <div class="dash-list reveal">
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">Accounts Receivable Dashboard</div><div class="dash-tags">AR Aging &nbsp;·&nbsp; Customer Dues &nbsp;·&nbsp; Outstanding Balances</div></div>
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">Accounts Payable Dashboard</div><div class="dash-tags">Vendor Payables &nbsp;·&nbsp; PO–GRN–Invoice Status</div></div>
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">GST Compliance Dashboard</div><div class="dash-tags">GSTR-1 vs 3B &nbsp;·&nbsp; 2A/2B Recon &nbsp;·&nbsp; ITC Tracking</div></div>
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">Inventory Dashboard</div><div class="dash-tags">Opening/Closing Stock &nbsp;·&nbsp; Variance &nbsp;·&nbsp; Slow-Moving</div></div>
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">Month-End Close Tracker</div><div class="dash-tags">Bank Recon &nbsp;·&nbsp; JE Checklist &nbsp;·&nbsp; Schedule Status</div></div>
+        <div class="dash-row"><div class="dash-dot"></div><div class="dash-name">Year-End Report</div><div class="dash-tags">Ledger Creation &nbsp;·&nbsp; TDS vs 26AS &nbsp;·&nbsp; Clean Books</div></div>
+      </div>
+    </section>
+
+    <!-- ══════ F — SKILLS & TOOLS ══════ -->
+    <section id="skills" class="reveal">
+      <div class="sec-tag">toolkit</div>
+      <div class="sec-heading">Skills &amp; Tools</div>
+      <div class="skill-groups">
+        <div class="reveal">
+          <div class="skill-group-label">Accounting</div>
+          <div class="tag-cloud">
+            <span class="s-tag gray">Accounts Receivable</span>
+            <span class="s-tag gray">Accounts Payable</span>
+            <span class="s-tag gray">General Ledger</span>
+            <span class="s-tag gray">Asset Management</span>
+            <span class="s-tag gray">Bookkeeping</span>
+            <span class="s-tag gray">Payroll Processing</span>
           </div>
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-users"></i></div>
-            <div class="dash-value">10+</div>
-            <div class="dash-label">GST Clients</div>
+        </div>
+        <div class="reveal">
+          <div class="skill-group-label">Tax &amp; Compliance</div>
+          <div class="tag-cloud">
+            <span class="s-tag gold">GST &amp; TDS</span>
+            <span class="s-tag gold">PF</span>
+            <span class="s-tag gold">ESI</span>
+            <span class="s-tag gold">PT</span>
+            <span class="s-tag gold">Traces</span>
+            <span class="s-tag gold">MCA</span>
+            <span class="s-tag gold">DSC HYP-2003</span>
           </div>
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-percent"></i></div>
-            <div class="dash-value">100%</div>
-            <div class="dash-label">On-Time Filing</div>
-          </div>
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
-            <div class="dash-value">₹1.8L</div>
-            <div class="dash-label">ITC Recovered</div>
-          </div>
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-code"></i></div>
-            <div class="dash-value">Services</div>
-            <div class="dash-label">Live Website</div>
-          </div>
-          <div class="dashboard-card reveal">
-            <div class="dash-icon"><i class="fa-solid fa-clock"></i></div>
-            <div class="dash-value">08h/day</div>
-            <div class="dash-label">Study Discipline</div>
+        </div>
+        <div class="reveal">
+          <div class="skill-group-label">Tools &amp; Software</div>
+          <div class="tag-cloud">
+            <span class="s-tag neon">Zoho Books</span>
+            <span class="s-tag neon">ERPNext (Frappe)</span>
+            <span class="s-tag neon">Excel (Advanced)</span>
+            <span class="s-tag neon">Tally</span>
+            <span class="s-tag neon">Power BI</span>
+            <span class="s-tag neon">Razorpay</span>
+            <span class="s-tag neon">RazorpayX</span>
+            <span class="s-tag neon">RazorpayX Payroll</span>
+            <span class="s-tag neon">WIN MAN</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- MINI FINANCE DASHBOARDS -->
-    <section id="dashboards" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">reporting</div>
-        <h2><i class="fas fa-chart-line"></i> Mini Finance Dashboards</h2>
-        <p style="margin-bottom:24px;font-family:var(--ff-mono);color:var(--gold-light);font-size:0.85rem;">// ERP & Excel-Based Finance Dashboards</p>
-        <div class="dashboard-grid">
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-arrow-trend-up" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>Accounts Receivable Dashboard</h3>
-            <ul>
-              <li>AR Aging (0–30 / 31–60 / 61–90 days)</li>
-              <li>Outstanding balance tracking</li>
-              <li>Customer-wise dues</li>
-            </ul>
+    <!-- ══════ G — EDUCATION ══════ -->
+    <section id="education" class="reveal">
+      <div class="sec-tag">academics</div>
+      <div class="sec-heading">Education</div>
+      <div class="edu-cards">
+        <div class="edu-card neon-border reveal">
+          <div class="edu-main">
+            <div class="edu-degree">Bachelor of Commerce (B.Com) – Finance &amp; HR</div>
+            <div class="edu-inst cyan">Community Institute of Commerce and Management Studies, Bangalore City University</div>
+            <div class="edu-date">Sept 2021 – July 2024</div>
           </div>
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-arrow-trend-down" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>Accounts Payable Dashboard</h3>
-            <ul>
-              <li>Vendor-wise payables</li>
-              <li>Due date analysis</li>
-              <li>PO–GRN–Invoice status tracking</li>
-            </ul>
+          <div class="edu-badge neon-bg">
+            <div class="edu-score">8.6</div>
+            <div class="edu-score-lbl cyan">CGPA</div>
           </div>
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-file-invoice-dollar" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>GST Compliance Dashboard</h3>
-            <ul>
-              <li>GSTR-1 vs GSTR-3B summary</li>
-              <li>2A/2B reconciliation status</li>
-              <li>ITC eligibility tracking</li>
-            </ul>
+        </div>
+        <div class="edu-card gold-border reveal">
+          <div class="edu-main">
+            <div class="edu-degree">CA Intermediate Aspirant</div>
+            <div class="edu-inst">Pursuing Chartered Accountancy</div>
+            <div class="edu-date" style="margin-top:4px;">Taxation &nbsp;·&nbsp; Audit &nbsp;·&nbsp; Financial Reporting</div>
           </div>
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-warehouse" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>Inventory Dashboard</h3>
-            <ul>
-              <li>Opening vs closing stock</li>
-              <li>Inward/outward movement</li>
-              <li>Variance and slow-moving items</li>
-            </ul>
+          <div class="edu-badge gold-bg" style="min-width:60px;">
+            <div class="edu-active-dot"></div>
+            <div class="edu-active-lbl">Active</div>
           </div>
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-calendar-check" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>Month-End Close Tracker</h3>
-            <ul>
-              <li>Bank reconciliation status</li>
-              <li>Journal entry checklist</li>
-              <li>Schedule completion tracker</li>
-            </ul>
+        </div>
+        <div class="edu-card reveal">
+          <div class="edu-main">
+            <div class="edu-degree">PUC – Commerce (MSBA)</div>
+            <div class="edu-inst">St. Joseph's Pre-University College, Karnataka Board</div>
+            <div class="edu-date">May 2019 – March 2021</div>
           </div>
-          <div class="mini-dash-item reveal">
-            <h3><i class="fas fa-chart-bar" style="color:var(--gold);margin-right:8px;font-size:0.9rem;"></i>Year-End Report</h3>
-            <ul>
-              <li>Clients Ledger Creation</li>
-              <li>TDS-Reconciliation with 26AS</li>
-              <li>Maintaining Clean Books</li>
-            </ul>
+          <div class="edu-badge gray-bg">
+            <div class="edu-score">81%</div>
+            <div class="edu-score-lbl gray">Score</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SKILLS & TOOLS -->
-    <section id="skills" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">toolkit</div>
-        <h2><i class="fas fa-microchip"></i> Skills & Tools</h2>
-        <div class="skills-grid">
-          <div class="skill-tag reveal">Accounts Receivable</div>
-          <div class="skill-tag reveal">Accounts Payable</div>
-          <div class="skill-tag reveal">Asset Management</div>
-          <div class="skill-tag reveal">General Ledger</div>
-          <div class="skill-tag reveal">GST & TDS</div>
-          <div class="skill-tag reveal">ERP Systems</div>
-          <div class="skill-tag reveal">Excel (Advanced)</div>
-          <div class="skill-tag reveal">Zoho Books</div>
-          <div class="skill-tag reveal">Tally</div>
-          <div class="skill-tag reveal">Power BI (Basic)</div>
-          <div class="skill-tag reveal">MCA</div>
-          <div class="skill-tag reveal">WIN MAN</div>
-          <div class="skill-tag reveal">Razorpay</div>
-          <div class="skill-tag reveal">RazorpayX</div>
-          <div class="skill-tag reveal">RazorpayX Payroll</div>
-          <div class="skill-tag reveal">Traces</div>
-          <div class="skill-tag reveal">DSC HYP-2003</div>
-          <div class="skill-tag reveal">PF</div>
-          <div class="skill-tag reveal">ESI</div>
-          <div class="skill-tag reveal">PT</div>
+    <!-- ══════ H — CONTACT ══════ -->
+    <section id="contact" class="reveal">
+      <div class="sec-tag">get in touch</div>
+      <div class="sec-heading">Contact Details</div>
+      <div class="contact-table reveal">
+        <div class="ct-row">
+          <div class="ct-icon"><i class="fas fa-envelope"></i></div>
+          <div class="ct-label">Email</div>
+          <div class="ct-value"><a href="mailto:harshiee2122@gmail.com">harshiee2122@gmail.com</a></div>
         </div>
-      </div>
-    </section>
-
-    <!-- EDUCATION -->
-    <section id="education" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">academics</div>
-        <h2><i class="fas fa-graduation-cap"></i> Education</h2>
-        <div class="edu-item reveal">
-          <h3 class="job-title">Bachelor of Commerce (B.Com) – Finance & HR</h3>
-          <div class="company">Community Institute of Commerce and Management Studies, Bangalore City University</div>
-          <div class="dates">Sept 2021 – July 2024 | CGPA: 8.6</div>
+        <div class="ct-row">
+          <div class="ct-icon"><i class="fas fa-phone"></i></div>
+          <div class="ct-label">Phone</div>
+          <div class="ct-value">+91-7411709054 &nbsp;·&nbsp; +91-9916548886</div>
         </div>
-        <div class="edu-item reveal">
-          <h3 class="job-title">CA Intermediate Aspirant</h3>
-          <p style="margin:8px 0 0;font-size:0.9rem;">Actively pursuing Chartered Accountancy with focus on taxation, audit, and financial reporting.</p>
+        <div class="ct-row">
+          <div class="ct-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="ct-label">Location</div>
+          <div class="ct-value">Bangalore, Karnataka</div>
         </div>
-        <div class="edu-item reveal">
-          <h3 class="job-title">PUC – Commerce (MSBA)</h3>
-          <div class="company">St. Joseph's Pre-University College, Karnataka Board</div>
-          <div class="dates">May 2019 – March 2021 | Percentage: 81%</div>
+        <div class="ct-row">
+          <div class="ct-icon"><i class="fab fa-linkedin"></i></div>
+          <div class="ct-label">LinkedIn</div>
+          <div class="ct-value"><a href="https://linkedin.com/in/harshiee" target="_blank" rel="noopener noreferrer">linkedin.com/in/harshiee</a></div>
         </div>
-      </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section id="contact" class="content-card reveal">
-      <div class="section-wrap">
-        <div class="section-tag">get in touch</div>
-        <h2><i class="fas fa-satellite-dish"></i> Contact Details</h2>
-        <div class="contact-grid">
-          <div class="contact-item reveal">
-            <div class="contact-label"><i class="fas fa-envelope"></i>&nbsp; Email</div>
-            <div><a href="mailto:harshiee2122@gmail.com">harshiee2122@gmail.com</a></div>
-          </div>
-          <div class="contact-item reveal">
-            <div class="contact-label"><i class="fas fa-phone"></i>&nbsp; Phone</div>
-            <div>+91-7411709054<br>+91-9916548886</div>
-          </div>
-          <div class="contact-item reveal">
-            <div class="contact-label"><i class="fas fa-map-marker-alt"></i>&nbsp; Location</div>
-            <div>Bangalore, Karnataka</div>
-          </div>
-          <div class="contact-item reveal">
-            <div class="contact-label"><i class="fab fa-linkedin"></i>&nbsp; LinkedIn</div>
-            <div><a href="https://linkedin.com/in/harshiee" target="_blank" rel="noopener noreferrer">linkedin.com/in/harshiee</a></div>
-          </div>
-          <div class="contact-item reveal">
-            <div class="contact-label"><i class="fas fa-blog"></i>&nbsp; Blog</div>
-            <div><a href="https://harshiee-s.github.io/growitharshiee-financial-services/Blog/" target="_blank" rel="noopener noreferrer">growitharshiee.blog</a></div>
-          </div>
+        <div class="ct-row">
+          <div class="ct-icon"><i class="fas fa-blog"></i></div>
+          <div class="ct-label">Blog</div>
+          <div class="ct-value"><a href="https://harshiee-s.github.io/growitharshiee-financial-services/Blog/" target="_blank" rel="noopener noreferrer">growitharshiee.blog</a></div>
         </div>
       </div>
     </section>
 
   </main>
-
   <footer>
     <div class="footer-line">&copy; 2026 Harshith G S. All rights reserved.</div>
   </footer>
 </div>
 
 <script>
-  /* ── Floating background words & icons ── */
-  const bgWords = [
-    'GST', 'TDS', 'GSTR-1', 'GSTR-3B', 'ITC', 'Debit', 'Credit',
-    'Ledger', 'Journal', 'Balance Sheet', 'P&L', 'Audit', 'Payroll',
-    'Reconciliation', 'Challan', 'Invoice', 'AR', 'AP', 'MIS', 'ERP',
-    'Tally', 'Zoho', 'CGST', 'SGST', 'IGST', 'PF', 'ESI', 'PT',
-    'Depreciation', 'Asset', 'Liability', 'Equity', 'Revenue', 'Expense',
-    'Trial Balance', 'Bank Recon', '26AS', 'Form-16', 'TAN', 'PAN',
-    'ITR', 'TRACES', 'NSDL', 'Cash Flow', 'Working Capital'
-  ];
+  /* ══════════════════════════════════════════
+     SPACE BACKGROUND — stars, planets, nebula
+  ══════════════════════════════════════════ */
+  (function () {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, dpr;
 
-  const bgIcons = [
-    'fa-file-invoice', 'fa-receipt', 'fa-calculator', 'fa-chart-line',
-    'fa-coins', 'fa-landmark', 'fa-file-invoice-dollar', 'fa-percent',
-    'fa-balance-scale', 'fa-piggy-bank', 'fa-briefcase', 'fa-chart-bar',
-    'fa-indian-rupee-sign', 'fa-wallet', 'fa-handshake'
-  ];
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      W   = window.innerWidth;
+      H   = window.innerHeight;
+      canvas.width        = W * dpr;
+      canvas.height       = H * dpr;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', () => { resize(); buildScene(); });
 
-  const layer = document.getElementById('bgFloat');
+    function r(min, max) { return min + Math.random() * (max - min); }
+    function rgba(r_, g_, b_, a_) { return `rgba(${r_},${g_},${b_},${a_})`; }
 
-  function spawnElement() {
-    const docH = document.body.scrollHeight;
-    const isIcon = Math.random() < 0.3;
-    const el = document.createElement('div');
+    /* ── STARS ─────────────────────────────── */
+    const STAR_COUNT = 320;
+    let stars = [];
 
-    const x = Math.random() * 100;
-    const dur = 18 + Math.random() * 22;
-    // Start from a random vertical position within the document
-    const startY = Math.random() * (docH * 0.9);
-    const travelPx = 300 + Math.random() * 400;
-    const rot = (Math.random() - 0.5) * 20;
-
-    if (isIcon) {
-      el.className = 'bg-icon ' + (Math.random() < 0.5 ? 'gold-icon' : 'neon-icon');
-      const icon = document.createElement('i');
-      icon.className = 'fas ' + bgIcons[Math.floor(Math.random() * bgIcons.length)];
-      el.appendChild(icon);
-    } else {
-      el.className = 'bg-word ' + (Math.random() < 0.55 ? 'gold-word' : 'neon-word');
-      el.textContent = bgWords[Math.floor(Math.random() * bgWords.length)];
+    function buildStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        const size = Math.random();
+        stars.push({
+          x: r(0, W), y: r(0, H),
+          radius: size < 0.7 ? r(0.3, 0.8)   /* tiny */
+                : size < 0.92 ? r(0.8, 1.4)  /* medium */
+                : r(1.4, 2.2),               /* bright */
+          baseAlpha: r(0.25, 0.9),
+          twinkleOffset: r(0, Math.PI * 2),
+          twinkleSpeed:  r(0.006, 0.022),
+          /* a few coloured stars */
+          hue: Math.random() < 0.15
+                ? (Math.random() < 0.5 ? 'gold' : 'neon')
+                : 'white',
+          /* parallax — deeper stars drift slower */
+          vx: r(-0.018, 0.018),
+          vy: r(-0.006, 0.006),
+        });
+      }
     }
 
-    el.style.cssText = `
-      position: absolute;
-      left: ${x}%;
-      top: ${startY}px;
-      --rot: ${rot}deg;
-      --travel: ${travelPx}px;
-      animation-duration: ${dur}s;
-      animation-delay: 0s;
-    `;
+    /* ── SHOOTING STARS ────────────────────── */
+    let shooters = [];
+    function spawnShooter() {
+      if (shooters.length > 3) return;
+      shooters.push({
+        x: r(0.1, 0.9) * W,
+        y: r(0.02, 0.3) * H,
+        angle: r(0.15, 0.45),         /* radians — shallow diagonal */
+        speed: r(14, 26),
+        length: r(80, 180),
+        alpha: r(0.5, 0.9),
+        life: 1.0,
+        decay: r(0.012, 0.025),
+      });
+    }
 
-    layer.appendChild(el);
-    setTimeout(() => el.remove(), dur * 1000 + 500);
-  }
+    /* ── PLANETS ───────────────────────────── */
+    let planets = [];
+    function buildPlanets() {
+      planets = [];
 
-  // Initial batch spread across page
-  for (let i = 0; i < 32; i++) spawnElement();
-  setInterval(spawnElement, 900);
+      /* Planet definitions — positioned as fractions of W/H */
+      const defs = [
+        /* Large gold/amber planet — top-right area */
+        {
+          xf: 0.83, yf: 0.14, radius: r(52, 64),
+          colors: ['#c8922a','#e0a94c','#f0ba5e','#a07020'],
+          ringColor: 'rgba(224,169,76,',
+          hasRing: true,
+          ringTilt: 0.28,
+          glowColor: '224,169,76',
+          glowAlpha: 0.12,
+          glowRadius: 2.6,
+          vx: 0.0001, vy: 0.00005,
+        },
+        /* Medium neon-blue planet — bottom-left */
+        {
+          xf: 0.10, yf: 0.76, radius: r(32, 42),
+          colors: ['#042c53','#185fa5','#378add','#00e5ff'],
+          ringColor: 'rgba(0,229,255,',
+          hasRing: false,
+          glowColor: '0,229,255',
+          glowAlpha: 0.10,
+          glowRadius: 2.4,
+          vx: -0.00008, vy: 0.00006,
+        },
+        /* Small dim planet — mid-right */
+        {
+          xf: 0.92, yf: 0.52, radius: r(16, 22),
+          colors: ['#1a1f2e','#2a3348','#3d4d6e'],
+          hasRing: false,
+          glowColor: '100,130,200',
+          glowAlpha: 0.07,
+          glowRadius: 2.0,
+          vx: 0.00012, vy: -0.00007,
+        },
+        /* Tiny moon near gold planet */
+        {
+          xf: 0.77, yf: 0.09, radius: r(7, 10),
+          colors: ['#555','#888','#aaa'],
+          hasRing: false,
+          glowColor: '200,200,200',
+          glowAlpha: 0.06,
+          glowRadius: 1.8,
+          vx: -0.00015, vy: 0.00010,
+        },
+      ];
 
-  /* ── Scroll reveal (fixed) ── */
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
+      defs.forEach(d => {
+        planets.push({ ...d, x: d.xf * W, y: d.yf * H });
+      });
+    }
+
+    /* ── NEBULA CLOUDS ─────────────────────── */
+    /* Pre-drawn as off-screen canvas, composited each frame */
+    let nebula;
+    function buildNebula() {
+      nebula = document.createElement('canvas');
+      nebula.width  = W;
+      nebula.height = H;
+      const nc = nebula.getContext('2d');
+
+      const blobs = [
+        { x: 0.18*W, y: 0.30*H, rx: W*0.28, ry: H*0.22, r:80, g:50, b:20,  a:0.032 },
+        { x: 0.75*W, y: 0.55*H, rx: W*0.22, ry: H*0.28, r:0,  g:80, b:120, a:0.025 },
+        { x: 0.50*W, y: 0.80*H, rx: W*0.30, ry: H*0.18, r:50, g:20, b:80,  a:0.020 },
+        { x: 0.88*W, y: 0.20*H, rx: W*0.14, ry: H*0.20, r:0,  g:60, b:100, a:0.030 },
+        { x: 0.30*W, y: 0.65*H, rx: W*0.18, ry: H*0.16, r:90, g:60, b:10,  a:0.022 },
+      ];
+
+      blobs.forEach(b => {
+        const grad = nc.createRadialGradient(b.x, b.y, 0, b.x, b.y, Math.max(b.rx, b.ry));
+        grad.addColorStop(0,   `rgba(${b.r},${b.g},${b.b},${b.a})`);
+        grad.addColorStop(0.5, `rgba(${b.r},${b.g},${b.b},${b.a * 0.4})`);
+        grad.addColorStop(1,   `rgba(${b.r},${b.g},${b.b},0)`);
+        nc.save();
+        nc.scale(b.rx / Math.max(b.rx, b.ry), b.ry / Math.max(b.rx, b.ry));
+        nc.fillStyle = grad;
+        nc.beginPath();
+        nc.arc(
+          b.x / (b.rx / Math.max(b.rx, b.ry)),
+          b.y / (b.ry / Math.max(b.rx, b.ry)),
+          Math.max(b.rx, b.ry), 0, Math.PI * 2
+        );
+        nc.fill();
+        nc.restore();
+      });
+    }
+
+    function buildScene() { buildStars(); buildPlanets(); buildNebula(); }
+    buildScene();
+
+    /* Schedule first shooter */
+    setTimeout(spawnShooter, r(2000, 5000));
+
+    /* ── DRAW LOOP ──────────────────────────── */
+    let t = 0;
+
+    function drawPlanet(p) {
+      const cx = p.x, cy = p.y, rad = p.radius;
+
+      /* Glow */
+      const gr = ctx.createRadialGradient(cx, cy, rad * 0.5, cx, cy, rad * p.glowRadius);
+      gr.addColorStop(0,   `rgba(${p.glowColor},${p.glowAlpha})`);
+      gr.addColorStop(1,   `rgba(${p.glowColor},0)`);
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad * p.glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* Planet body — simple radial gradient with a few colour stops */
+      const pg = ctx.createRadialGradient(cx - rad*0.3, cy - rad*0.3, rad*0.05, cx, cy, rad);
+      const cols = p.colors;
+      pg.addColorStop(0,    cols[2] || cols[0]);
+      pg.addColorStop(0.45, cols[1] || cols[0]);
+      pg.addColorStop(0.8,  cols[0]);
+      pg.addColorStop(1,    cols[3] || cols[0]);
+      ctx.fillStyle = pg;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* Subtle atmosphere rim */
+      const rim = ctx.createRadialGradient(cx, cy, rad * 0.82, cx, cy, rad);
+      rim.addColorStop(0,   `rgba(${p.glowColor},0)`);
+      rim.addColorStop(1,   `rgba(${p.glowColor},0.18)`);
+      ctx.fillStyle = rim;
+      ctx.beginPath();
+      ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+      ctx.fill();
+
+      /* Ring (for planets that have one) */
+      if (p.hasRing) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(1, p.ringTilt);
+        const rInner = rad * 1.35, rOuter = rad * 2.1;
+        const rg = ctx.createRadialGradient(0, 0, rInner, 0, 0, rOuter);
+        rg.addColorStop(0,   p.ringColor + '0)');
+        rg.addColorStop(0.2, p.ringColor + '0.22)');
+        rg.addColorStop(0.5, p.ringColor + '0.30)');
+        rg.addColorStop(0.8, p.ringColor + '0.18)');
+        rg.addColorStop(1,   p.ringColor + '0)');
+        ctx.strokeStyle = rg;
+        ctx.lineWidth = rOuter - rInner;
+        ctx.beginPath();
+        ctx.arc(0, 0, (rInner + rOuter) / 2, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
       }
+
+      /* Move */
+      p.x += p.vx * W;
+      p.y += p.vy * H;
+      if (p.x < -rad * 3)  p.x = W + rad * 3;
+      if (p.x > W + rad*3) p.x = -rad * 3;
+      if (p.y < -rad * 3)  p.y = H + rad * 3;
+      if (p.y > H + rad*3) p.y = -rad * 3;
+    }
+
+    function draw() {
+      t++;
+      ctx.clearRect(0, 0, W, H);
+
+      /* Deep space gradient */
+      const bg = ctx.createLinearGradient(0, 0, W * 0.4, H);
+      bg.addColorStop(0,   '#06080d');
+      bg.addColorStop(0.5, '#07090f');
+      bg.addColorStop(1,   '#050710');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      /* Nebula */
+      ctx.drawImage(nebula, 0, 0, W, H);
+
+      /* Planets */
+      planets.forEach(drawPlanet);
+
+      /* Stars */
+      stars.forEach(s => {
+        s.x += s.vx; s.y += s.vy;
+        if (s.x < 0) s.x = W; if (s.x > W) s.x = 0;
+        if (s.y < 0) s.y = H; if (s.y > H) s.y = 0;
+
+        const twinkle = s.baseAlpha * (0.55 + 0.45 * Math.sin(t * s.twinkleSpeed + s.twinkleOffset));
+
+        if (s.hue === 'gold') {
+          ctx.fillStyle = rgba(224, 169, 76, twinkle);
+        } else if (s.hue === 'neon') {
+          ctx.fillStyle = rgba(100, 210, 255, twinkle * 0.85);
+        } else {
+          ctx.fillStyle = rgba(255, 255, 255, twinkle);
+        }
+
+        /* Cross / sparkle for larger stars */
+        if (s.radius > 1.6) {
+          const arm = s.radius * 2.8;
+          ctx.fillStyle = rgba(255, 255, 255, twinkle * 0.35);
+          ctx.fillRect(s.x - arm / 2, s.y - 0.5, arm, 1);
+          ctx.fillRect(s.x - 0.5, s.y - arm / 2, 1, arm);
+        }
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      /* Shooting stars */
+      shooters = shooters.filter(s => s.life > 0);
+      shooters.forEach(s => {
+        s.x += Math.cos(s.angle) * s.speed;
+        s.y += Math.sin(s.angle) * s.speed;
+        s.life -= s.decay;
+
+        const tx = s.x - Math.cos(s.angle) * s.length;
+        const ty = s.y - Math.sin(s.angle) * s.length;
+        const sg = ctx.createLinearGradient(tx, ty, s.x, s.y);
+        sg.addColorStop(0, `rgba(255,255,255,0)`);
+        sg.addColorStop(1, `rgba(255,255,255,${s.alpha * s.life})`);
+        ctx.strokeStyle = sg;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(tx, ty);
+        ctx.lineTo(s.x, s.y);
+        ctx.stroke();
+
+        if (s.x > W * 1.1 || s.y > H * 1.1) s.life = 0;
+      });
+
+      if (shooters.length === 0) {
+        setTimeout(spawnShooter, r(3000, 9000));
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) requestAnimationFrame(draw);
     });
-  }, {
-    threshold: 0.08,
-    rootMargin: "0px 0px -40px 0px"
-  });
+  })();
 
-  document.querySelectorAll('.reveal').forEach((el) => {
-    revealObserver.observe(el);
-  });
+  /* ══════════════════════════════════════════
+     SPARSE FINANCE ICONS — a few drifting up
+  ══════════════════════════════════════════ */
+  (function () {
+    const layer = document.getElementById('symbolLayer');
 
-  /* ── Sticky nav show/hide & active link ── */
+    const FA_ICONS = [
+      'fa-file-invoice', 'fa-calculator', 'fa-chart-line',
+      'fa-coins', 'fa-indian-rupee-sign', 'fa-percent',
+      'fa-wallet', 'fa-landmark', 'fa-receipt',
+      'fa-piggy-bank', 'fa-scale-balanced', 'fa-briefcase',
+    ];
+    const WORDS   = ['GST','TDS','ITC','AR','AP','MIS','P&L','GSTR','₹'];
+    const COLORS  = ['c-gold','c-neon','c-white'];
+
+    function rand(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function rb(a, b)  { return a + Math.random() * (b - a); }
+
+    function spawn() {
+      /* Only spawn icons ~65% of the time, short words 35% */
+      const isIcon = Math.random() < 0.65;
+      const el     = document.createElement('div');
+      const color  = rand(COLORS);
+      const isLg   = Math.random() < 0.22;
+
+      if (isIcon) {
+        el.className = `sym icon ${isLg ? 'lg' : ''} ${color}`;
+        const i = document.createElement('i');
+        i.className = 'fas ' + rand(FA_ICONS);
+        el.appendChild(i);
+      } else {
+        el.className = `sym word ${color}`;
+        el.textContent = rand(WORDS);
+      }
+
+      const x   = rb(2, 96);
+      const y   = rb(5, 95);
+      const dy  = rb(-300, -120);
+      const rot = rb(-15, 15);
+      const dur = rb(28, 52);
+      const del = rb(0, dur * 0.9);
+
+      el.style.cssText = `
+        left: ${x}%;
+        top:  ${y}%;
+        --dy: ${dy}px;
+        --r:  ${rot}deg;
+        --r2: ${rot + rb(-10,10)}deg;
+        animation-duration: ${dur}s;
+        animation-delay: -${del}s;
+      `;
+
+      layer.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 1) * 1000);
+    }
+
+    /* Populate sparsely — only 18 symbols at once */
+    for (let i = 0; i < 18; i++) spawn();
+    setInterval(spawn, 2200);
+  })();
+
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); } });
+  }, { threshold: 0.06, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  /* ── Sticky nav ── */
   const stickyNav = document.getElementById('stickyNav');
   const heroSection = document.getElementById('home');
   const allSections = document.querySelectorAll('section[id]');
   const stickyLinks = document.querySelectorAll('#stickyNav .nav-links a');
+  const bgVideoWrap = document.querySelector('.bg-video-wrap');
 
   function updateNav() {
     const heroBottom = heroSection.offsetTop + heroSection.offsetHeight - 80;
-    if (window.scrollY > heroBottom) {
+    const pastHero = window.scrollY > heroBottom;
+
+    if (pastHero) {
       stickyNav.classList.remove('at-top');
       stickyNav.classList.toggle('scrolled', window.scrollY > heroBottom + 40);
+      if (bgVideoWrap) bgVideoWrap.classList.add('visible');
     } else {
       stickyNav.classList.add('at-top');
+      if (bgVideoWrap) bgVideoWrap.classList.remove('visible');
+    }
+    let current = '';
+    allSections.forEach(sec => { if (window.scrollY >= sec.offsetTop - 130) current = sec.id; });
+    stickyLinks.forEach(link => { link.classList.toggle('active', link.getAttribute('href') === '#' + current); });
+  }
+  window.addEventListener('scroll', updateNav, { passive:true });
+  updateNav();
+  /* ── BACKGROUND CANVAS ANIMATION ── */
+  (function() {
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, dpr;
+
+    function resize() {
+      dpr = window.devicePixelRatio || 1;
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width  = W * dpr;
+      canvas.height = H * dpr;
+      canvas.style.width  = W + 'px';
+      canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    /* ── 1. PARTICLES ── */
+    const GOLD  = { r:224, g:169, b:76  };
+    const NEON  = { r:0,   g:229, b:255 };
+    const WHITE = { r:255, g:255, b:255 };
+
+    const PARTICLE_COUNT = 90;
+    const particles = [];
+
+    function randColor() {
+      const pick = Math.random();
+      if (pick < 0.45) return GOLD;
+      if (pick < 0.75) return NEON;
+      return WHITE;
     }
 
-    // Active section highlight
-    let current = '';
-    allSections.forEach(sec => {
-      if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
-    });
-    stickyLinks.forEach(link => {
-      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
-    });
-  }
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      const c = randColor();
+      particles.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        vx: (Math.random() - 0.5) * 0.28,
+        vy: (Math.random() - 0.5) * 0.28,
+        r: 0.6 + Math.random() * 1.2,
+        alpha: 0.18 + Math.random() * 0.35,
+        color: c,
+        pulseOffset: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.004 + Math.random() * 0.006
+      });
+    }
 
-  window.addEventListener('scroll', updateNav, { passive: true });
-  updateNav();
+    /* ── 2. ORBS ── */
+    const orbs = [
+      { x: 0.12, y: 0.18, r: 220, color: GOLD,  alpha: 0.045, vx: 0.00018, vy: 0.00012 },
+      { x: 0.82, y: 0.08, r: 180, color: NEON,  alpha: 0.032, vx:-0.00014, vy: 0.00016 },
+      { x: 0.55, y: 0.72, r: 260, color: GOLD,  alpha: 0.028, vx: 0.00010, vy:-0.00010 },
+      { x: 0.92, y: 0.55, r: 150, color: NEON,  alpha: 0.038, vx:-0.00020, vy:-0.00008 },
+      { x: 0.25, y: 0.88, r: 190, color: WHITE, alpha: 0.018, vx: 0.00012, vy: 0.00014 },
+    ];
+
+    /* ── 3. SCAN LINES ── */
+    const scanLines = [];
+    for (let i = 0; i < 3; i++) {
+      scanLines.push({
+        y: Math.random(),
+        speed: 0.00018 + Math.random() * 0.00025,
+        alpha: 0.025 + Math.random() * 0.03,
+        width: 0.5 + Math.random() * 1,
+        color: Math.random() < 0.6 ? GOLD : NEON
+      });
+    }
+
+    /* ── 4. DIAGONAL BEAMS ── */
+    const beams = [];
+    for (let i = 0; i < 4; i++) {
+      beams.push({
+        x: Math.random(),
+        angle: (Math.PI / 6) + Math.random() * (Math.PI / 4),
+        speed: 0.00008 + Math.random() * 0.00012,
+        alpha: 0.0 + Math.random() * 0.018,
+        width: 60 + Math.random() * 120,
+        color: Math.random() < 0.5 ? GOLD : NEON,
+        dir: Math.random() < 0.5 ? 1 : -1
+      });
+    }
+
+    let t = 0;
+
+    function rgba(c, a) {
+      return `rgba(${c.r},${c.g},${c.b},${a})`;
+    }
+
+    function draw() {
+      t++;
+      ctx.clearRect(0, 0, W, H);
+
+      /* -- background fill -- */
+      ctx.fillStyle = '#07090e';
+      ctx.fillRect(0, 0, W, H);
+
+      /* -- ORBS -- */
+      orbs.forEach(o => {
+        o.x += o.vx;
+        o.y += o.vy;
+        if (o.x < -0.1) o.x = 1.1;
+        if (o.x > 1.1)  o.x = -0.1;
+        if (o.y < -0.1) o.y = 1.1;
+        if (o.y > 1.1)  o.y = -0.1;
+
+        const cx = o.x * W;
+        const cy = o.y * H;
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, o.r);
+        grad.addColorStop(0,   rgba(o.color, o.alpha));
+        grad.addColorStop(0.5, rgba(o.color, o.alpha * 0.4));
+        grad.addColorStop(1,   rgba(o.color, 0));
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, o.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      /* -- DIAGONAL BEAMS -- */
+      beams.forEach(b => {
+        b.x += b.speed * b.dir;
+        if (b.x > 1.5) b.x = -0.5;
+        if (b.x < -0.5) b.x = 1.5;
+
+        ctx.save();
+        ctx.translate(b.x * W, 0);
+        ctx.rotate(b.angle);
+        const g = ctx.createLinearGradient(-b.width / 2, 0, b.width / 2, 0);
+        g.addColorStop(0,   rgba(b.color, 0));
+        g.addColorStop(0.5, rgba(b.color, b.alpha));
+        g.addColorStop(1,   rgba(b.color, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(-b.width / 2, -H, b.width, H * 3);
+        ctx.restore();
+      });
+
+      /* -- CONNECTIONS between close particles -- */
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const maxDist = 110;
+          if (dist < maxDist) {
+            const a = (1 - dist / maxDist) * 0.1;
+            ctx.strokeStyle = rgba(particles[i].color, a);
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      /* -- PARTICLES -- */
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = W;
+        if (p.x > W) p.x = 0;
+        if (p.y < 0) p.y = H;
+        if (p.y > H) p.y = 0;
+
+        const pulse = p.alpha * (0.7 + 0.3 * Math.sin(t * p.pulseSpeed + p.pulseOffset));
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = rgba(p.color, pulse);
+        ctx.fill();
+      });
+
+      /* -- SCAN LINES -- */
+      scanLines.forEach(s => {
+        s.y += s.speed;
+        if (s.y > 1) s.y = 0;
+        const sy = s.y * H;
+        const g = ctx.createLinearGradient(0, sy - 40, 0, sy + 40);
+        g.addColorStop(0,   rgba(s.color, 0));
+        g.addColorStop(0.5, rgba(s.color, s.alpha));
+        g.addColorStop(1,   rgba(s.color, 0));
+        ctx.fillStyle = g;
+        ctx.fillRect(0, sy - 40, W, 80);
+      });
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  })();
 </script>
 </body>
 </html>
